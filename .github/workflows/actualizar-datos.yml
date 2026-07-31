@@ -1,0 +1,51 @@
+# Regenera datos.json y lo publica — 100 % gratis con GitHub Actions.
+#
+# Con esto el dashboard se actualiza solo cada madrugada sin servidor propio:
+# GitHub corre el script, hace commit del JSON y Vercel redespliega al detectar
+# el push. Cero costo de hosting y cero mantenimiento de infraestructura.
+#
+# En producción, el paso "Generar datos" se reemplaza por la descarga real
+# desde Google Sheets (ver README § Conectar datos reales).
+
+name: Actualizar datos del dashboard
+
+on:
+  schedule:
+    - cron: "0 8 * * *"      # 03:00 hora de Lima (UTC-5)
+  workflow_dispatch:          # permite ejecutarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar datos (demo con data ficticia)
+        run: |
+          python scripts/generar_warehouse.py
+          python scripts/construir_dashboard.py
+
+      - name: Verificar que los KPIs siguen siendo correctos
+        run: python -m pytest tests/ -q
+
+      - name: Publicar si cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/datos.json warehouse/
+          if git diff --staged --quiet; then
+            echo "sin cambios en los datos"
+          else
+            git commit -m "chore(datos): actualizacion automatica del dashboard"
+            git push
+          fi
