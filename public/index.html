@@ -84,7 +84,9 @@ h1{font-size:19px;font-weight:700;letter-spacing:-.02em}
 h2{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
 .card-sub{font-size:12px;color:var(--text-2);margin-bottom:12px}
 .chart{position:relative;width:100%}
-.chart svg{display:block;width:100%;height:auto;overflow:visible}
+/* overflow oculto: ningún trazo debe salirse de su tarjeta pase lo que pase */
+.chart{overflow:hidden}
+.chart svg{display:block;width:100%;height:auto}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--text-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:12px;height:3px;border-radius:2px;display:inline-block}
@@ -221,6 +223,11 @@ footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);
   </footer>
 </div>
 
+<!-- Copia embebida de los datos: permite abrir este archivo con doble clic,
+     donde el navegador bloquea fetch() por el protocolo file://.
+     Si el sitio está servido, se usa datos.json (siempre más fresco). -->
+<script src="datos.js"></script>
+
 <script>
 /* ════════════════════════════════════════════════════════════════════════
    Mini librería de gráficos en SVG — sin dependencias externas.
@@ -230,7 +237,11 @@ footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);
 const NS = 'http://www.w3.org/2000/svg';
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const fmt = (n, d = 0) => Number(n).toLocaleString('es-PE', {minimumFractionDigits: d, maximumFractionDigits: d});
-const compacto = (n) => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '') + 'K' : fmt(n);
+const compacto = (n) => {
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.0', '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '') + 'K';
+  return fmt(n);
+};
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const fechaCorta = (iso) => { const [a,m,d] = iso.split('-'); return `${+d} ${MESES[+m-1]}`; };
 
@@ -251,6 +262,16 @@ function tooltip(cont) {
   if (!t) { t = document.createElement('div'); t.className = 'tip'; cont.appendChild(t); }
   return t;
 }
+/** Estado vacío: una fuente sin datos no debe romper el resto del tablero.
+ *  Devuelve true si no había nada que dibujar. */
+function sinDatos(cont, hay, alto = 120,
+                  mensaje = 'Sin datos en el período seleccionado') {
+  if (hay) return false;
+  cont.innerHTML = `<div style="height:${alto}px;display:grid;place-items:center;
+    color:var(--muted);font-size:12.5px;border:1px dashed var(--grid);
+    border-radius:10px">${mensaje}</div>`;
+  return true;
+}
 /** Coloca el tooltip sin que se salga del contenedor. */
 function ubicarTip(cont, tip, xFrac, yFrac) {
   const cw = cont.clientWidth, ch = cont.clientHeight;
@@ -265,7 +286,12 @@ function ubicarTip(cont, tip, xFrac, yFrac) {
 /** Escala "bonita": redondea el tope para que los ticks caigan en números
  *  limpios (0 / 250 / 500…), como exige la anatomía de ejes. */
 function escala(maxCrudo, ticks = 4) {
-  const bruto = Math.max(maxCrudo, 1e-9) / ticks;
+  // Serie toda en cero (o vacía): un eje 0–1 es más honesto que uno con
+  // valores infinitesimales como 2.5e-10.
+  if (!Number.isFinite(maxCrudo) || maxCrudo <= 0) {
+    return {max: 1, paso: 1 / ticks, ticks};
+  }
+  const bruto = maxCrudo / ticks;
   const mag = Math.pow(10, Math.floor(Math.log10(bruto)));
   const norm = bruto / mag;
   const paso = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5
@@ -290,11 +316,21 @@ function ejeY(svg, pad, w, h, esc, sufijo = '') {
 /* ── Línea (1 o N series) con crosshair + tooltip ─────────────────────── */
 function lineChart(cont, {series, alto = 260, sufijo = '', etiquetasDirectas = true,
                           suave = null, area = false}) {
+  // Una fuente puede no tener datos (red que aún no se usa, API caída):
+  // se muestra el estado vacío en vez de romper el tablero completo.
+  series = (series || []).filter(s => s && s.datos && s.datos.length);
+  if (sinDatos(cont, series.length, alto)) return;
+
   const w = 900, h = alto, pad = {t: 18, r: etiquetasDirectas ? 74 : 20, b: 30, l: 46};
   const svg = svgBase(cont, w, h);
   const puntos = series[0].datos;
   const n = puntos.length;
-  const pico = Math.max(...series.flatMap(s => s.datos.map(p => p.valor)), 1);
+  // El pico debe considerar TAMBIÉN la serie cruda de fondo: si no, sus picos
+  // quedan por encima del tope del eje y, con overflow visible, se dibujan
+  // fuera del gráfico (encima de las tarjetas de arriba).
+  const todos = series.flatMap(s => s.datos.map(p => p.valor))
+    .concat((suave || []).map(p => p.valor));
+  const pico = Math.max(...todos, 1);
   const esc = escala(pico * 1.08, 4);
   const X = (i) => pad.l + (n <= 1 ? 0 : i * (w - pad.l - pad.r) / (n - 1));
   const Y = (v) => h - pad.b - (v / esc.max) * (h - pad.t - pad.b);
@@ -373,6 +409,8 @@ function lineChart(cont, {series, alto = 260, sufijo = '', etiquetasDirectas = t
 
 /* ── Barras horizontales (magnitud → rampa secuencial) ─────────────────── */
 function barChart(cont, {datos, alto = null, sufijo = '', decimales = 0}) {
+  datos = datos || [];
+  if (sinDatos(cont, datos.length, 100)) return;
   const filas = datos.length;
   const w = 560, fila = 34, pad = {t: 8, r: 58, b: 8, l: 124};
   const h = alto || (pad.t + pad.b + filas * fila);
@@ -416,6 +454,9 @@ function barChart(cont, {datos, alto = null, sufijo = '', decimales = 0}) {
 
 /* ── Columnas (serie temporal corta, ej. campañas de email) ────────────── */
 function columnChart(cont, {datos, alto = 240, sufijo = '%', umbral = null}) {
+  datos = datos || [];
+  if (sinDatos(cont, datos.length, alto,
+               'Aún no hay campañas enviadas en el período')) return;
   const w = 620, h = alto, pad = {t: 22, r: 14, b: 44, l: 44};
   const svg = svgBase(cont, w, h);
   const n = datos.length;
@@ -469,6 +510,8 @@ function columnChart(cont, {datos, alto = 240, sufijo = '%', umbral = null}) {
 
 /* ── Sparkline del hero ────────────────────────────────────────────────── */
 function sparkline(cont, datos) {
+  datos = datos || [];
+  if (!datos.length) { cont.innerHTML = ''; return; }
   const w = 220, h = 64, pad = 6;
   const svg = svgBase(cont, w, h);
   const vals = datos.map(d => d.valor);
@@ -620,12 +663,32 @@ document.getElementById('btnTema').addEventListener('click', () => {
 addEventListener('resize', () => { clearTimeout(window._rz);
   window._rz = setTimeout(() => DATOS && render(), 180); });
 
-fetch('datos.json')
-  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+/* Carga de datos con respaldo:
+   1) fetch de datos.json — siempre la versión más fresca (sitio desplegado)
+   2) si falla (típicamente al abrir el archivo con doble clic, donde file://
+      bloquea fetch por CORS), usa la copia embebida de datos.js
+   Así el dashboard funciona igual servido que abierto directamente. */
+function cargarDatos() {
+  return fetch('datos.json')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .catch(err => {
+      if (window.DATOS_EMBEBIDOS) {
+        console.info('datos.json no accesible (' + err.message +
+                     '); usando la copia embebida de datos.js');
+        return window.DATOS_EMBEBIDOS;
+      }
+      throw err;
+    });
+}
+
+cargarDatos()
   .then(j => { DATOS = j; render(); })
   .catch(err => {
-    document.getElementById('subtitulo').textContent =
-      'No se pudo cargar datos.json — corre: python scripts/construir_dashboard.py';
+    const local = location.protocol === 'file:';
+    document.getElementById('subtitulo').textContent = local
+      ? 'No se encontraron los datos. Genera el tablero con: '
+        + 'python scripts/construir_dashboard.py'
+      : 'No se pudo cargar datos.json (' + err.message + ')';
     console.error(err);
   });
 </script>
