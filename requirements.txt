@@ -1,0 +1,2 @@
+# Solo librería estándar de Python. La única dependencia es para tests:
+pytest>=8.0
