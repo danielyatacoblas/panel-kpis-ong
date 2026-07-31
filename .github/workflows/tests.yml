@@ -1,0 +1,81 @@
+# Corre la suite completa en cada push y en cada pull request.
+# Gratis con GitHub Actions y da el badge verde de "tests passing" en el repo.
+
+name: tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Regenerar el warehouse y el JSON del dashboard
+        run: |
+          python scripts/generar_warehouse.py
+          python scripts/construir_dashboard.py
+
+      # La data ficticia usa semilla fija: regenerarla debe dar exactamente lo
+      # mismo. Si cambia, alguien tocó el generador sin actualizar los datos.
+      # El warehouse se compara estricto; en datos.json se ignora "generado_en",
+      # que cambia cada día sin que los datos hayan cambiado.
+      - name: Verificar que la data ficticia es reproducible
+        run: |
+          git diff --exit-code -- warehouse/ \
+            || (echo "::error::El warehouse regenerado no coincide con el del repo." && exit 1)
+          git diff --exit-code -I'"generado_en"' -- public/datos.json \
+            || (echo "::error::datos.json no coincide. Corre: python scripts/construir_dashboard.py" && exit 1)
+
+      # datos.js es la copia embebida (minificada, todo en una línea), así que
+      # no se puede comparar ignorando líneas: se verifica que su contenido
+      # coincida con el de datos.json, que es la fuente.
+      - name: Verificar que la copia embebida está sincronizada
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          js = pathlib.Path("public/datos.js").read_text(encoding="utf-8")
+          i, f = js.index("{"), js.rindex("}")
+          embebido = json.loads(js[i:f + 1])
+          fuente = json.loads(pathlib.Path("public/datos.json").read_text(encoding="utf-8"))
+          if embebido != fuente:
+              print("::error::datos.js no coincide con datos.json. "
+                    "Corre: python scripts/construir_dashboard.py")
+              sys.exit(1)
+          print("La copia embebida coincide con datos.json")
+          PY
+
+      - name: Correr los tests
+        run: python -m pytest tests/ -v
+
+      # El dashboard es un archivo estático: si el JS no parsea, la página
+      # queda en blanco y no lo notaríamos hasta desplegarla.
+      - name: Verificar la sintaxis del JavaScript del dashboard
+        run: |
+          python - <<'PY'
+          import re, pathlib, subprocess, sys
+          html = pathlib.Path("public/index.html").read_text(encoding="utf-8")
+          bloques = re.findall(r"<script>(.*?)</script>", html, re.S)
+          assert bloques, "no se encontró el bloque <script> del dashboard"
+          pathlib.Path("_dash.js").write_text(bloques[0], encoding="utf-8")
+          r = subprocess.run(["node", "--check", "_dash.js"],
+                             capture_output=True, text=True)
+          if r.returncode:
+              print(r.stderr)
+              sys.exit(1)
+          print("JavaScript del dashboard: sintaxis correcta")
+          PY
+          rm -f _dash.js
