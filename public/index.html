@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Club STEM · Dashboard de KPIs</title>
+<meta name="description" content="Dashboard de KPIs del programa: captación, email, redes, web y gestión educativa." />
+<style>
+/* ── Tokens (paleta validada con el validador de contraste/CVD) ─────────── */
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f4f4f1;
+  --text-1:#0b0b0b; --text-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --up:#006300;
+  --seq-100:#cde2fb; --seq-250:#86b6ef; --seq-350:#5598e7; --seq-450:#2a78d6; --seq-550:#1c5cab; --seq-650:#104281;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d;
+    --text-1:#ffffff; --text-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --up:#0ca30c;
+    --seq-100:#104281; --seq-250:#184f95; --seq-350:#256abf; --seq-450:#2a78d6; --seq-550:#5598e7; --seq-650:#86b6ef;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --plane:#0d0d0d;
+  --text-1:#ffffff; --text-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --up:#0ca30c;
+  --seq-100:#104281; --seq-250:#184f95; --seq-350:#256abf; --seq-450:#2a78d6; --seq-550:#5598e7; --seq-650:#86b6ef;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--plane);
+     color:var(--text-1);-webkit-font-smoothing:antialiased;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 48px}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+       flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:11px;background:var(--s1);color:#fff;
+      display:grid;place-items:center;font-weight:800;font-size:17px;letter-spacing:-.03em}
+h1{font-size:19px;font-weight:700;letter-spacing:-.02em}
+.sub{font-size:12.5px;color:var(--text-2);margin-top:1px}
+.hdr-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{font:600 12.5px inherit;padding:8px 13px;border-radius:9px;border:1px solid var(--border);
+     background:var(--surface-1);color:var(--text-2);cursor:pointer;transition:.15s}
+.btn:hover{color:var(--text-1);border-color:var(--axis)}
+.btn[aria-pressed="true"]{background:var(--s1);border-color:var(--s1);color:#fff}
+.stamp{font-size:11.5px;color:var(--muted);padding:8px 0}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+.hero{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);
+      padding:22px 24px;margin-bottom:14px;display:flex;justify-content:space-between;
+      align-items:flex-end;gap:20px;flex-wrap:wrap}
+.hero-lbl{font-size:12.5px;color:var(--text-2);font-weight:600}
+.hero-val{font-size:52px;font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-top:4px}
+.hero-note{font-size:12.5px;color:var(--text-2);margin-top:6px}
+.delta{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700}
+.delta.pos{color:var(--up)} .delta.neg{color:var(--crit)} .delta.flat{color:var(--muted)}
+.hero-spark{flex:0 0 220px;height:64px;max-width:100%}
+
+/* ── KPI tiles ──────────────────────────────────────────────────────────── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px;margin-bottom:16px}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px 15px}
+.tile-lbl{font-size:11.5px;color:var(--text-2);font-weight:600}
+.tile-val{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:5px 0 3px}
+.tile-foot{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+
+/* ── Charts ─────────────────────────────────────────────────────────────── */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:14px}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);
+      padding:18px 18px 14px;margin-bottom:14px;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+        flex-wrap:wrap;margin-bottom:2px}
+h2{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+.card-sub{font-size:12px;color:var(--text-2);margin-bottom:12px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--text-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+.note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+.alerta{margin-top:10px;font-size:12px;padding:9px 12px;border-radius:9px;
+        background:color-mix(in srgb,var(--crit) 10%,transparent);
+        border:1px solid color-mix(in srgb,var(--crit) 35%,transparent);color:var(--text-1)}
+.alerta b{color:var(--crit)}
+
+/* tooltip */
+.tip{position:absolute;pointer-events:none;background:var(--surface-1);color:var(--text-1);
+     border:1px solid var(--axis);border-radius:9px;padding:8px 11px;font-size:12px;
+     box-shadow:0 6px 20px rgba(0,0,0,.14);opacity:0;transition:opacity .12s;z-index:5;
+     min-width:120px}
+.tip b{font-size:13px}
+.tip .row{display:flex;justify-content:space-between;gap:14px;margin-top:3px;color:var(--text-2)}
+.tip .row b{color:var(--text-1);font-variant-numeric:tabular-nums}
+.tip .sw{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:5px}
+
+/* tabla accesible */
+.tabla-wrap{overflow-x:auto;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--grid)}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--plane)}
+
+footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);
+       font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;
+       gap:12px;flex-wrap:wrap}
+.oculto{display:none!important}
+@media (max-width:640px){
+  .hero-val{font-size:40px}
+  .grid2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">CS</div>
+      <div>
+        <h1>Club STEM · Dashboard de KPIs</h1>
+        <div class="sub" id="subtitulo">Cargando datos…</div>
+      </div>
+    </div>
+    <div class="hdr-tools">
+      <button class="btn" id="btnTabla" aria-pressed="false">Ver tablas</button>
+      <button class="btn" id="btnTema">Modo oscuro</button>
+      <span class="stamp" id="stamp"></span>
+    </div>
+  </header>
+
+  <!-- HERO: el número que lidera el tablero -->
+  <section class="hero" aria-labelledby="heroLbl">
+    <div>
+      <div class="hero-lbl" id="heroLbl">Leads generados · últimos 30 días</div>
+      <div class="hero-val" id="heroVal">—</div>
+      <div class="hero-note"><span id="heroDelta" class="delta flat">—</span>
+        <span> frente a los 30 días anteriores</span></div>
+    </div>
+    <div class="hero-spark chart" id="heroSpark"></div>
+  </section>
+
+  <!-- KPI ROW -->
+  <section class="kpis" id="kpis" aria-label="Indicadores del período"></section>
+
+  <!-- LEADS -->
+  <section class="card">
+    <div class="card-h"><h2>Captación de leads</h2></div>
+    <div class="card-sub">Leads por día · línea suavizada a 7 días para ver la tendencia
+      bajo la estacionalidad semanal</div>
+    <div class="chart" id="chLeads"></div>
+    <div class="note">Los picos coinciden con días de campaña. La línea clara es el dato
+      diario; la línea gruesa, la media móvil de 7 días.</div>
+    <div class="tabla-wrap oculto" data-tabla="leads"></div>
+  </section>
+
+  <div class="grid2">
+    <!-- CANALES -->
+    <section class="card">
+      <div class="card-h"><h2>¿De dónde vienen los leads?</h2></div>
+      <div class="card-sub">Volumen por canal en los últimos 30 días</div>
+      <div class="chart" id="chCanales"></div>
+      <div class="tabla-wrap oculto" data-tabla="canales"></div>
+    </section>
+
+    <!-- CONVERSIÓN POR CANAL -->
+    <section class="card">
+      <div class="card-h"><h2>¿Qué canal convierte mejor?</h2></div>
+      <div class="card-sub">% de leads que terminan inscritos, por canal</div>
+      <div class="chart" id="chConversion"></div>
+      <div class="note">Volumen y conversión no son lo mismo: un canal puede traer
+        muchos leads y convertir poco. Cruzar ambos es lo que dice dónde invertir.</div>
+      <div class="tabla-wrap oculto" data-tabla="conversion"></div>
+    </section>
+  </div>
+
+  <!-- REDES -->
+  <section class="card">
+    <div class="card-h"><h2>Alcance en redes sociales</h2></div>
+    <div class="card-sub">Personas alcanzadas por día y por red · media móvil de 7 días</div>
+    <div class="chart" id="chRedes"></div>
+    <div class="legend" id="lgRedes"></div>
+    <div class="tabla-wrap oculto" data-tabla="redes"></div>
+  </section>
+
+  <div class="grid2">
+    <!-- EMAIL -->
+    <section class="card">
+      <div class="card-h"><h2>Email · tasa de apertura</h2></div>
+      <div class="card-sub">Por campaña enviada (newsletter semanal)</div>
+      <div class="chart" id="chEmail"></div>
+      <div class="alerta" id="alertaEmail" hidden></div>
+      <div class="tabla-wrap oculto" data-tabla="email"></div>
+    </section>
+
+    <!-- EDUCACIÓN -->
+    <section class="card">
+      <div class="card-h"><h2>Asistencia por taller</h2></div>
+      <div class="card-sub">% de inscritos que efectivamente asisten</div>
+      <div class="chart" id="chTalleres"></div>
+      <div class="note">Métrica propuesta: la asistencia real mide la calidad del
+        programa mejor que el número de inscritos.</div>
+      <div class="tabla-wrap oculto" data-tabla="talleres"></div>
+    </section>
+  </div>
+
+  <footer>
+    <span id="fuentes"></span>
+    <span>Datos ficticios de demostración · sin información de personas reales</span>
+  </footer>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   Mini librería de gráficos en SVG — sin dependencias externas.
+   Especificaciones: líneas 2px, marcadores r≥4 con anillo de 2px del color
+   de superficie, barras ≤24px con extremo redondeado 4px, grilla hairline.
+   ════════════════════════════════════════════════════════════════════════ */
+const NS = 'http://www.w3.org/2000/svg';
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt = (n, d = 0) => Number(n).toLocaleString('es-PE', {minimumFractionDigits: d, maximumFractionDigits: d});
+const compacto = (n) => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '') + 'K' : fmt(n);
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fechaCorta = (iso) => { const [a,m,d] = iso.split('-'); return `${+d} ${MESES[+m-1]}`; };
+
+function el(tag, attrs = {}, padre = null) {
+  const n = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (padre) padre.appendChild(n);
+  return n;
+}
+function svgBase(cont, w, h) {
+  cont.innerHTML = '';
+  const svg = el('svg', {viewBox: `0 0 ${w} ${h}`, role: 'img',
+                         preserveAspectRatio: 'xMidYMid meet'}, cont);
+  return svg;
+}
+function tooltip(cont) {
+  let t = cont.querySelector('.tip');
+  if (!t) { t = document.createElement('div'); t.className = 'tip'; cont.appendChild(t); }
+  return t;
+}
+/** Coloca el tooltip sin que se salga del contenedor. */
+function ubicarTip(cont, tip, xFrac, yFrac) {
+  const cw = cont.clientWidth, ch = cont.clientHeight;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = xFrac * cw + 14, y = yFrac * ch - th - 10;
+  if (x + tw > cw) x = xFrac * cw - tw - 14;
+  if (x < 0) x = 4;
+  if (y < 0) y = yFrac * ch + 14;
+  if (y + th > ch) y = Math.max(0, ch - th - 2);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+/** Escala "bonita": redondea el tope para que los ticks caigan en números
+ *  limpios (0 / 250 / 500…), como exige la anatomía de ejes. */
+function escala(maxCrudo, ticks = 4) {
+  const bruto = Math.max(maxCrudo, 1e-9) / ticks;
+  const mag = Math.pow(10, Math.floor(Math.log10(bruto)));
+  const norm = bruto / mag;
+  const paso = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5
+                : norm <= 5 ? 5 : 10) * mag;
+  return {max: paso * ticks, paso, ticks};
+}
+function ejeY(svg, pad, w, h, esc, sufijo = '') {
+  // si el paso es fraccionario (2.5) se muestra un decimal: 0 / 2.5 / 5 / 7.5
+  const dec = Number.isInteger(esc.paso) ? 0 : 1;
+  for (let i = 0; i <= esc.ticks; i++) {
+    const v = esc.paso * i;
+    const y = h - pad.b - (v / esc.max) * (h - pad.t - pad.b);
+    el('line', {x1: pad.l, y1: y, x2: w - pad.r, y2: y,
+                stroke: css('--grid'), 'stroke-width': 1}, svg);
+    const t = el('text', {x: pad.l - 8, y: y + 4, 'text-anchor': 'end',
+                          fill: css('--muted'), 'font-size': 11,
+                          style: 'font-variant-numeric:tabular-nums'}, svg);
+    t.textContent = (v >= 1000 ? compacto(v) : fmt(v, dec)) + sufijo;
+  }
+}
+
+/* ── Línea (1 o N series) con crosshair + tooltip ─────────────────────── */
+function lineChart(cont, {series, alto = 260, sufijo = '', etiquetasDirectas = true,
+                          suave = null, area = false}) {
+  const w = 900, h = alto, pad = {t: 18, r: etiquetasDirectas ? 74 : 20, b: 30, l: 46};
+  const svg = svgBase(cont, w, h);
+  const puntos = series[0].datos;
+  const n = puntos.length;
+  const pico = Math.max(...series.flatMap(s => s.datos.map(p => p.valor)), 1);
+  const esc = escala(pico * 1.08, 4);
+  const X = (i) => pad.l + (n <= 1 ? 0 : i * (w - pad.l - pad.r) / (n - 1));
+  const Y = (v) => h - pad.b - (v / esc.max) * (h - pad.t - pad.b);
+
+  ejeY(svg, pad, w, h, esc, sufijo);
+  el('line', {x1: pad.l, y1: h - pad.b, x2: w - pad.r, y2: h - pad.b,
+              stroke: css('--axis'), 'stroke-width': 1}, svg);
+
+  // eje X: ~6 etiquetas
+  const paso = Math.max(1, Math.round(n / 6));
+  for (let i = 0; i < n; i += paso) {
+    const t = el('text', {x: X(i), y: h - pad.b + 17, 'text-anchor': 'middle',
+                          fill: css('--muted'), 'font-size': 11}, svg);
+    t.textContent = fechaCorta(puntos[i].fecha);
+  }
+
+  // serie tenue de fondo (dato crudo) si se pasa
+  if (suave) {
+    const d = suave.map((p, i) => `${i ? 'L' : 'M'}${X(i)},${Y(p.valor)}`).join(' ');
+    el('path', {d, fill: 'none', stroke: css(series[0].color),
+                'stroke-width': 1, opacity: .3}, svg);
+  }
+
+  series.forEach((s) => {
+    const col = css(s.color);
+    const d = s.datos.map((p, i) => `${i ? 'L' : 'M'}${X(i)},${Y(p.valor)}`).join(' ');
+    if (area && series.length === 1) {
+      el('path', {d: `${d} L${X(n-1)},${h-pad.b} L${X(0)},${h-pad.b} Z`,
+                  fill: col, opacity: .10}, svg);
+    }
+    el('path', {d, fill: 'none', stroke: col, 'stroke-width': 2,
+                'stroke-linejoin': 'round', 'stroke-linecap': 'round'}, svg);
+    // marcador final con anillo de superficie (2px)
+    const ux = X(n - 1), uy = Y(s.datos[n - 1].valor);
+    el('circle', {cx: ux, cy: uy, r: 5, fill: col,
+                  stroke: css('--surface-1'), 'stroke-width': 2}, svg);
+    if (etiquetasDirectas) {
+      const t = el('text', {x: ux + 10, y: uy + 4, fill: css('--text-2'),
+                            'font-size': 11.5, 'font-weight': 600}, svg);
+      t.textContent = s.nombre;
+    }
+  });
+
+  // capa de interacción: crosshair + tooltip
+  const tip = tooltip(cont);
+  const cross = el('line', {y1: pad.t, y2: h - pad.b, stroke: css('--axis'),
+                            'stroke-width': 1, opacity: 0}, svg);
+  const dots = series.map(s => el('circle', {r: 4.5, fill: css(s.color),
+                                             stroke: css('--surface-1'),
+                                             'stroke-width': 2, opacity: 0}, svg));
+  const capa = el('rect', {x: pad.l, y: pad.t, width: w - pad.l - pad.r,
+                           height: h - pad.t - pad.b, fill: 'transparent'}, svg);
+  capa.style.cursor = 'crosshair';
+  capa.addEventListener('pointermove', (ev) => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * w;
+    let i = Math.round((px - pad.l) / ((w - pad.l - pad.r) / Math.max(1, n - 1)));
+    i = Math.max(0, Math.min(n - 1, i));
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i));
+    cross.setAttribute('opacity', .55);
+    let html = `<b>${fechaCorta(puntos[i].fecha)}</b>`;
+    series.forEach((s, k) => {
+      const p = s.datos[i];
+      dots[k].setAttribute('cx', X(i)); dots[k].setAttribute('cy', Y(p.valor));
+      dots[k].setAttribute('opacity', 1);
+      html += `<div class="row"><span><span class="sw" style="background:${css(s.color)}"></span>${s.nombre}</span><b>${fmt(p.valor, sufijo === '%' ? 1 : 0)}${sufijo}</b></div>`;
+    });
+    tip.innerHTML = html; tip.style.opacity = 1;
+    ubicarTip(cont, tip, X(i) / w, Y(series[0].datos[i].valor) / h);
+  });
+  capa.addEventListener('pointerleave', () => {
+    tip.style.opacity = 0; cross.setAttribute('opacity', 0);
+    dots.forEach(d => d.setAttribute('opacity', 0));
+  });
+}
+
+/* ── Barras horizontales (magnitud → rampa secuencial) ─────────────────── */
+function barChart(cont, {datos, alto = null, sufijo = '', decimales = 0}) {
+  const filas = datos.length;
+  const w = 560, fila = 34, pad = {t: 8, r: 58, b: 8, l: 124};
+  const h = alto || (pad.t + pad.b + filas * fila);
+  const svg = svgBase(cont, w, h);
+  const max = Math.max(...datos.map(d => d.valor), 1);
+  const ramp = ['--seq-650', '--seq-550', '--seq-450', '--seq-350', '--seq-250', '--seq-100'];
+  const tip = tooltip(cont);
+
+  datos.forEach((d, i) => {
+    const y = pad.t + i * fila + (fila - 22) / 2;
+    const largo = Math.max(3, (d.valor / max) * (w - pad.l - pad.r));
+    const col = css(ramp[Math.min(i, ramp.length - 1)]);
+    // etiqueta de categoría (token de texto, nunca el color de la serie)
+    const lb = el('text', {x: pad.l - 10, y: y + 15, 'text-anchor': 'end',
+                           fill: css('--text-2'), 'font-size': 12}, svg);
+    lb.textContent = d.nombre;
+    // barra: 22px de grosor, extremo redondeado 4px, cuadrado en la base
+    const r = el('path', {
+      d: `M${pad.l},${y} H${pad.l + largo - 4} a4,4 0 0 1 4,4 V${y + 18}
+          a4,4 0 0 1 -4,4 H${pad.l} Z`.replace(/\s+/g, ' '),
+      fill: col}, svg);
+    r.style.cursor = 'pointer';
+    // valor al final de la barra (etiqueta directa selectiva)
+    const v = el('text', {x: pad.l + largo + 8, y: y + 15, fill: css('--text-1'),
+                          'font-size': 12, 'font-weight': 600,
+                          style: 'font-variant-numeric:tabular-nums'}, svg);
+    v.textContent = fmt(d.valor, decimales) + sufijo;
+
+    r.addEventListener('pointerenter', () => {
+      r.setAttribute('opacity', .82);
+      tip.innerHTML = `<b>${d.nombre}</b><div class="row"><span>${d.etiqueta || 'Valor'}</span><b>${fmt(d.valor, decimales)}${sufijo}</b></div>` +
+                      (d.extra ? `<div class="row"><span>${d.extra.k}</span><b>${d.extra.v}</b></div>` : '');
+      tip.style.opacity = 1;
+      ubicarTip(cont, tip, (pad.l + largo) / w, (y + 11) / h);
+    });
+    r.addEventListener('pointerleave', () => {
+      r.setAttribute('opacity', 1); tip.style.opacity = 0;
+    });
+  });
+}
+
+/* ── Columnas (serie temporal corta, ej. campañas de email) ────────────── */
+function columnChart(cont, {datos, alto = 240, sufijo = '%', umbral = null}) {
+  const w = 620, h = alto, pad = {t: 22, r: 14, b: 44, l: 44};
+  const svg = svgBase(cont, w, h);
+  const n = datos.length;
+  const esc = escala(Math.max(...datos.map(d => d.valor), umbral || 0) * 1.15, 4);
+  const banda = (w - pad.l - pad.r) / n;
+  const ancho = Math.min(24, banda - 8);          // ≤24px y con aire en la banda
+  const Y = (v) => h - pad.b - (v / esc.max) * (h - pad.t - pad.b);
+  const tip = tooltip(cont);
+
+  ejeY(svg, pad, w, h, esc, sufijo);
+  el('line', {x1: pad.l, y1: h - pad.b, x2: w - pad.r, y2: h - pad.b,
+              stroke: css('--axis'), 'stroke-width': 1}, svg);
+
+  if (umbral) {   // línea de referencia (promedio del período)
+    const y = Y(umbral);
+    el('line', {x1: pad.l, y1: y, x2: w - pad.r, y2: y, stroke: css('--muted'),
+                'stroke-width': 1, 'stroke-dasharray': '4 3', opacity: .8}, svg);
+    const t = el('text', {x: w - pad.r, y: y - 6, 'text-anchor': 'end',
+                          fill: css('--muted'), 'font-size': 10.5}, svg);
+    t.textContent = `promedio ${fmt(umbral, 1)}${sufijo}`;
+  }
+
+  datos.forEach((d, i) => {
+    const cx = pad.l + banda * i + banda / 2;
+    const y = Y(d.valor), alt = Math.max(4, h - pad.b - y);
+    const bajo = umbral && d.valor < umbral * 0.85;
+    const col = bajo ? css('--crit') : css('--s1');
+    const r = el('path', {
+      d: `M${cx - ancho/2},${y + 4} a4,4 0 0 1 4,-4 H${cx + ancho/2 - 4}
+          a4,4 0 0 1 4,4 V${y + alt} H${cx - ancho/2} Z`.replace(/\s+/g, ' '),
+      fill: col}, svg);
+    r.style.cursor = 'pointer';
+    if (i % Math.ceil(n / 7) === 0 || i === n - 1) {
+      const t = el('text', {x: cx, y: h - pad.b + 16, 'text-anchor': 'middle',
+                            fill: css('--muted'), 'font-size': 10.5}, svg);
+      t.textContent = fechaCorta(d.fecha);
+    }
+    r.addEventListener('pointerenter', () => {
+      r.setAttribute('opacity', .82);
+      tip.innerHTML = `<b>${d.campana || fechaCorta(d.fecha)}</b>` +
+        `<div class="row"><span>Apertura</span><b>${fmt(d.valor,1)}${sufijo}</b></div>` +
+        (d.clics != null ? `<div class="row"><span>Clics</span><b>${fmt(d.clics,1)}%</b></div>` : '');
+      tip.style.opacity = 1;
+      ubicarTip(cont, tip, cx / w, y / h);
+    });
+    r.addEventListener('pointerleave', () => {
+      r.setAttribute('opacity', 1); tip.style.opacity = 0;
+    });
+  });
+}
+
+/* ── Sparkline del hero ────────────────────────────────────────────────── */
+function sparkline(cont, datos) {
+  const w = 220, h = 64, pad = 6;
+  const svg = svgBase(cont, w, h);
+  const vals = datos.map(d => d.valor);
+  const min = Math.min(...vals), max = Math.max(...vals) || 1;
+  const X = (i) => pad + i * (w - pad * 2) / Math.max(1, datos.length - 1);
+  const Y = (v) => h - pad - ((v - min) / ((max - min) || 1)) * (h - pad * 2);
+  const d = datos.map((p, i) => `${i ? 'L' : 'M'}${X(i)},${Y(p.valor)}`).join(' ');
+  el('path', {d: `${d} L${X(datos.length-1)},${h} L${X(0)},${h} Z`,
+              fill: css('--s1'), opacity: .10}, svg);
+  el('path', {d, fill: 'none', stroke: css('--s1'), 'stroke-width': 2,
+              'stroke-linejoin': 'round', 'stroke-linecap': 'round'}, svg);
+  el('circle', {cx: X(datos.length - 1), cy: Y(vals[vals.length - 1]), r: 4,
+                fill: css('--s1'), stroke: css('--surface-1'), 'stroke-width': 2}, svg);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Carga de datos y render
+   ════════════════════════════════════════════════════════════════════════ */
+let DATOS = null;
+const REDES_COLOR = {instagram: '--s1', facebook: '--s2', linkedin: '--s3', tiktok: '--s4'};
+const REDES_NOMBRE = {instagram: 'Instagram', facebook: 'Facebook',
+                      linkedin: 'LinkedIn', tiktok: 'TikTok'};
+
+function deltaHTML(v, mejor) {
+  if (!v) return '<span class="delta flat">sin cambio</span>';
+  const bueno = mejor === 'abajo' ? v < 0 : v > 0;
+  const flecha = v > 0 ? '▲' : '▼';
+  return `<span class="delta ${bueno ? 'pos' : 'neg'}">${flecha} ${Math.abs(v).toFixed(1)} %</span>`;
+}
+
+function render() {
+  const d = DATOS;
+  document.getElementById('subtitulo').textContent =
+    `Últimos ${d.periodo.dias_kpi} días · ${d.periodo.desde} al ${d.periodo.hasta}`;
+  document.getElementById('stamp').textContent = `actualizado ${d.generado_en}`;
+  document.getElementById('fuentes').textContent =
+    'Fuentes: ' + d.fuentes.map(f => f.nombre).join(' · ');
+
+  // ── hero ──
+  const hero = d.kpis.find(k => k.id === 'leads');
+  document.getElementById('heroVal').textContent = fmt(hero.valor);
+  document.getElementById('heroDelta').outerHTML =
+    deltaHTML(hero.variacion, hero.mejor).replace('class="delta', 'id="heroDelta" class="delta');
+  sparkline(document.getElementById('heroSpark'), d.series.leads_dia_suavizado.slice(-30));
+
+  // ── tiles ──
+  const tiles = d.kpis.filter(k => k.id !== 'leads');
+  document.getElementById('kpis').innerHTML = tiles.map(k => {
+    const dec = k.unidad === '%' ? 1 : (k.unidad.includes('día') ? 2 : 0);
+    return `<div class="tile">
+      <div class="tile-lbl">${k.etiqueta}</div>
+      <div class="tile-val">${k.valor >= 10000 ? compacto(k.valor) : fmt(k.valor, dec)}${k.unidad === '%' ? ' %' : (k.unidad || '')}</div>
+      <div class="tile-foot">${deltaHTML(k.variacion, k.mejor)}<span>vs. período anterior</span></div>
+    </div>`;
+  }).join('');
+
+  // ── leads por día ──
+  lineChart(document.getElementById('chLeads'), {
+    series: [{nombre: 'Leads (media 7d)', color: '--s1', datos: d.series.leads_dia_suavizado}],
+    suave: d.series.leads_dia, area: true, etiquetasDirectas: false, alto: 250,
+  });
+
+  // ── canales (volumen) ──
+  const canales = Object.entries(d.desgloses.leads_por_canal)
+    .map(([k, v]) => ({nombre: k.charAt(0).toUpperCase() + k.slice(1), valor: v,
+                       etiqueta: 'Leads',
+                       extra: {k: 'Conversión', v: (d.desgloses.conversion_por_canal[k] ?? 0).toFixed(1) + ' %'}}));
+  barChart(document.getElementById('chCanales'), {datos: canales});
+
+  // ── conversión por canal ──
+  const conv = Object.entries(d.desgloses.conversion_por_canal)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => ({nombre: k.charAt(0).toUpperCase() + k.slice(1), valor: v,
+                       etiqueta: 'Conversión'}));
+  barChart(document.getElementById('chConversion'), {datos: conv, sufijo: ' %', decimales: 1});
+
+  // ── redes (4 series categóricas: leyenda + etiquetas directas) ──
+  const seriesRedes = Object.entries(d.series.alcance_por_red).map(([red, datos]) => ({
+    nombre: REDES_NOMBRE[red] || red, color: REDES_COLOR[red] || '--s1', datos,
+  }));
+  lineChart(document.getElementById('chRedes'), {series: seriesRedes, alto: 280});
+  document.getElementById('lgRedes').innerHTML = seriesRedes.map(s =>
+    `<span><i style="background:${css(s.color)}"></i>${s.nombre}</span>`).join('');
+
+  // ── email ──
+  const camp = d.series.apertura_campana;
+  const prom = camp.reduce((a, c) => a + c.valor, 0) / (camp.length || 1);
+  columnChart(document.getElementById('chEmail'), {datos: camp, umbral: prom});
+  const ult3 = camp.slice(-3), promUlt = ult3.reduce((a, c) => a + c.valor, 0) / (ult3.length || 1);
+  if (promUlt < prom * 0.9) {
+    const al = document.getElementById('alertaEmail');
+    al.hidden = false;
+    al.innerHTML = `<b>Atención:</b> las últimas ${ult3.length} campañas promedian
+      ${promUlt.toFixed(1)} % de apertura, por debajo del promedio del período
+      (${prom.toFixed(1)} %). Vale revisar asuntos, horario de envío y limpieza de lista.`;
+  }
+
+  // ── talleres ──
+  const tall = Object.entries(d.desgloses.asistencia_por_taller)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => ({nombre: k, valor: v, etiqueta: 'Asistencia'}));
+  barChart(document.getElementById('chTalleres'), {datos: tall, sufijo: ' %', decimales: 1});
+
+  construirTablas();
+}
+
+/* ── Vista de tabla (canal de accesibilidad: nada depende solo del color) ── */
+function tabla(cabeceras, filas) {
+  return `<table><thead><tr>${cabeceras.map((c, i) =>
+    `<th${i ? ' class="num"' : ''}>${c}</th>`).join('')}</tr></thead><tbody>${
+    filas.map(f => `<tr>${f.map((c, i) =>
+      `<td${i ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function construirTablas() {
+  const d = DATOS, q = (s) => document.querySelector(`[data-tabla="${s}"]`);
+  q('leads').innerHTML = tabla(['Fecha', 'Leads', 'Media 7d'],
+    d.series.leads_dia.map((p, i) => [fechaCorta(p.fecha), fmt(p.valor),
+      fmt(d.series.leads_dia_suavizado[i].valor, 1)]).slice(-30));
+  q('canales').innerHTML = tabla(['Canal', 'Leads', 'Conversión %'],
+    Object.entries(d.desgloses.leads_por_canal).map(([k, v]) =>
+      [k, fmt(v), fmt(d.desgloses.conversion_por_canal[k] ?? 0, 1)]));
+  q('conversion').innerHTML = tabla(['Canal', 'Conversión %'],
+    Object.entries(d.desgloses.conversion_por_canal).map(([k, v]) => [k, fmt(v, 1)]));
+  q('redes').innerHTML = tabla(['Red', 'Alcance total (30d)'],
+    Object.entries(d.desgloses.alcance_por_red).map(([k, v]) =>
+      [REDES_NOMBRE[k] || k, fmt(v)]));
+  q('email').innerHTML = tabla(['Campaña', 'Fecha', 'Apertura %', 'Clics %'],
+    d.series.apertura_campana.map(c => [c.campana, fechaCorta(c.fecha),
+      fmt(c.valor, 1), fmt(c.clics, 1)]));
+  q('talleres').innerHTML = tabla(['Taller', 'Asistencia %'],
+    Object.entries(d.desgloses.asistencia_por_taller).map(([k, v]) => [k, fmt(v, 1)]));
+}
+
+/* ── Controles ─────────────────────────────────────────────────────────── */
+document.getElementById('btnTabla').addEventListener('click', (e) => {
+  const on = e.target.getAttribute('aria-pressed') === 'true';
+  e.target.setAttribute('aria-pressed', String(!on));
+  e.target.textContent = on ? 'Ver tablas' : 'Ocultar tablas';
+  document.querySelectorAll('.tabla-wrap').forEach(t => t.classList.toggle('oculto', on));
+});
+document.getElementById('btnTema').addEventListener('click', () => {
+  const oscuroAhora = document.documentElement.getAttribute('data-theme') === 'dark'
+    || (!document.documentElement.getAttribute('data-theme')
+        && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme', oscuroAhora ? 'light' : 'dark');
+  document.getElementById('btnTema').textContent = oscuroAhora ? 'Modo oscuro' : 'Modo claro';
+  if (DATOS) render();     // los colores se releen del tema activo
+});
+addEventListener('resize', () => { clearTimeout(window._rz);
+  window._rz = setTimeout(() => DATOS && render(), 180); });
+
+fetch('datos.json')
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(j => { DATOS = j; render(); })
+  .catch(err => {
+    document.getElementById('subtitulo').textContent =
+      'No se pudo cargar datos.json — corre: python scripts/construir_dashboard.py';
+    console.error(err);
+  });
+</script>
+</body>
+</html>
