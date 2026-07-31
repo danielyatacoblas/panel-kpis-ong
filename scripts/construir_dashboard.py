@@ -26,6 +26,7 @@ from src import kpis  # noqa: E402
 
 WH = ROOT / "warehouse"
 SALIDA = ROOT / "public" / "datos.json"
+RESPALDO = ROOT / "public" / "datos.js"      # copia embebida para abrir sin servidor
 
 FUENTES = ("leads", "email", "redes", "web", "educacion")
 DIAS_KPI = 30        # ventana de los KPIs
@@ -56,10 +57,12 @@ def main():
     # apertura por campaña (puntual, no diaria: el newsletter es semanal)
     email_ordenado = sorted(kpis.ventana(datos["email"], hasta, DIAS_SERIE),
                             key=lambda e: e["fecha"])
+    # Se usan los helpers seguros de kpis: una celda vacía o no numérica en la
+    # hoja no debe tumbar la construcción del tablero.
     apertura_campana = [{
-        "fecha": e["fecha"], "campana": e["campana"],
-        "valor": kpis.tasa(int(e["aperturas"]), int(e["enviados"])),
-        "clics": kpis.tasa(int(e["clics"]), int(e["enviados"])),
+        "fecha": e.get("fecha", ""), "campana": e.get("campana", "(sin nombre)"),
+        "valor": kpis.tasa(kpis._i(e.get("aperturas")), kpis._i(e.get("enviados"))),
+        "clics": kpis.tasa(kpis._i(e.get("clics")), kpis._i(e.get("enviados"))),
     } for e in email_ordenado]
 
     salida = {
@@ -95,8 +98,20 @@ def main():
     SALIDA.write_text(json.dumps(salida, ensure_ascii=False, indent=1),
                       encoding="utf-8")
 
+    # Copia embebida como respaldo: permite abrir el dashboard con doble clic.
+    # Con el protocolo file:// el navegador bloquea fetch() por CORS, así que
+    # sin esto el tablero se vería roto para quien no levante un servidor.
+    RESPALDO.write_text(
+        "// Generado por scripts/construir_dashboard.py — no editar a mano.\n"
+        "// Respaldo para abrir el dashboard sin servidor (file://).\n"
+        "window.DATOS_EMBEBIDOS = "
+        + json.dumps(salida, ensure_ascii=False, separators=(",", ":"))
+        + ";\n", encoding="utf-8")
+
     kb = SALIDA.stat().st_size / 1024
     print(f"✓ {SALIDA.relative_to(ROOT)} ({kb:.0f} KB)")
+    print(f"✓ {RESPALDO.relative_to(ROOT)} "
+          f"({RESPALDO.stat().st_size/1024:.0f} KB — respaldo para file://)")
     print(f"  período KPI: últimos {DIAS_KPI} días hasta {hasta}")
     print(f"  series: {DIAS_SERIE} días\n")
     print("KPIs calculados:")

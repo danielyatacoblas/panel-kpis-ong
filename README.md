@@ -5,7 +5,7 @@
 [![sin dependencias](https://img.shields.io/badge/frontend-sin%20dependencias-informational)](public/index.html)
 [![licencia](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
 
-**Valida del aviso:** construir y mantener un dashboard de KPIs · automatizar la
+**Qué requisitos del aviso cubre:** construir y mantener un dashboard de KPIs · automatizar la
 actualización desde CRM, redes, email y formularios · **proponer mejoras a qué
 métricas se miden y cómo se visualizan**.
 
@@ -51,10 +51,19 @@ pip install pytest
 python scripts/generar_warehouse.py       # 90 días de data ficticia
 python scripts/construir_dashboard.py     # calcula KPIs → public/datos.json
 python -m pytest tests/ -v                # 26 tests
+node tests/probar_graficos_vacios.mjs     # gráficos con datos vacíos
+```
 
-# ver el dashboard
+Para verlo, **abre `public/index.html` con doble clic** — funciona tal cual, sin
+servidor. O sírvelo si prefieres:
+
+```bash
 cd public && python -m http.server 8899   # → http://localhost:8899
 ```
+
+> El tablero carga `datos.json` cuando está servido y cae a una copia embebida
+> (`datos.js`) cuando se abre con `file://`, donde el navegador bloquea `fetch`
+> por CORS. Así nadie ve un dashboard roto por abrirlo "mal".
 
 Salida real de `construir_dashboard.py`:
 
@@ -141,7 +150,8 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 03_dashboard_kpis/
 ├── public/
 │   ├── index.html          # dashboard completo (HTML+CSS+JS, sin dependencias)
-│   └── datos.json          # generado; lo consume el front
+│   ├── datos.json          # generado; lo consume el front cuando está servido
+│   └── datos.js            # generado; copia embebida para abrir sin servidor
 ├── src/kpis.py             # todas las fórmulas (una función por métrica)
 ├── scripts/
 │   ├── generar_warehouse.py    # 90 días de data ficticia reproducible
@@ -166,6 +176,7 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 | Series | Días sin datos se rellenan con 0; media móvil correcta |
 | Multi-serie | Todas las series comparten el mismo eje temporal *(este test encontró un bug real durante el desarrollo)* |
 | Contrato | `datos.json` tiene exactamente la forma que el dashboard espera |
+| Gráficos | Con una fuente vacía muestran "sin datos" en vez de romper el tablero *(bug encontrado en revisión)* |
 
 ---
 
