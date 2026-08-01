@@ -129,8 +129,20 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 - **Un solo eje por gráfico.** Nunca dos escalas Y: es la forma más común de
   mentir con un gráfico. Dos medidas distintas → dos gráficos.
 - **Paleta validada, no elegida a ojo.** Se corrió el validador de
-  contraste/daltonismo sobre los 4 colores en modo claro y oscuro. Los 4 pasan
+  contraste/daltonismo sobre los 5 colores en modo claro y oscuro. Los 5 pasan
   las separaciones CVD; por eso las líneas llevan además **etiqueta directa**.
+- **El color acompaña a la entidad, no al ranking.** Facebook es siempre
+  naranja, Instagram siempre verde, TikTok siempre amarillo — en todos los
+  gráficos. Si cambia el orden o se filtra, el lector no reaprende la leyenda.
+  Está verificado que ningún gráfico repita color entre sus series.
+- **Animaciones que dirigen la mirada, no que decoran.** La línea se dibuja,
+  las barras crecen desde su base, los números cuentan hacia arriba. Se
+  ejecutan **solo en la primera carga**: al cambiar de tema o redimensionar
+  serían una distracción.
+- **Las animaciones no pueden dejar el tablero a medias.** El estado final es
+  el predeterminado y la animación parte desde el inicial dentro del keyframe:
+  si no llega a ejecutarse (impresión, captura, motor sin soporte), se ve
+  completo igual. Y con `prefers-reduced-motion` no se ejecutan en absoluto.
 - **El color nunca es el único canal.** Leyenda + etiquetas directas + botón
   **"Ver tablas"** que muestra todos los datos en tablas accesibles.
 - **Etiquetas selectivas.** Valor en la punta de cada barra y al final de cada
