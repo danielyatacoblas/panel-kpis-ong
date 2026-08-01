@@ -12,7 +12,7 @@
   --surface-1:#fcfcfb; --plane:#f4f4f1;
   --text-1:#0b0b0b; --text-2:#52514e; --muted:#898781;
   --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
-  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
   --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --up:#006300;
   --seq-100:#cde2fb; --seq-250:#86b6ef; --seq-350:#5598e7; --seq-450:#2a78d6; --seq-550:#1c5cab; --seq-650:#104281;
   --radius:14px;
@@ -23,7 +23,7 @@
     --surface-1:#1a1a19; --plane:#0d0d0d;
     --text-1:#ffffff; --text-2:#c3c2b7; --muted:#898781;
     --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
-    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
     --up:#0ca30c;
     --seq-100:#104281; --seq-250:#184f95; --seq-350:#256abf; --seq-450:#2a78d6; --seq-550:#5598e7; --seq-650:#86b6ef;
   }
@@ -33,7 +33,7 @@
   --surface-1:#1a1a19; --plane:#0d0d0d;
   --text-1:#ffffff; --text-2:#c3c2b7; --muted:#898781;
   --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
   --up:#0ca30c;
   --seq-100:#104281; --seq-250:#184f95; --seq-350:#256abf; --seq-450:#2a78d6; --seq-550:#5598e7; --seq-650:#86b6ef;
 }
@@ -87,6 +87,39 @@ h2{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
 /* overflow oculto: ningún trazo debe salirse de su tarjeta pase lo que pase */
 .chart{overflow:hidden}
 .chart svg{display:block;width:100%;height:auto}
+
+/* ── Animaciones ─────────────────────────────────────────────────────────
+   Dirigen la mirada (la línea se dibuja, la barra crece); no son adorno.
+
+   Principio de seguridad: el estado FINAL es el predeterminado y la animación
+   parte desde el inicial dentro del keyframe. Si por cualquier motivo no se
+   ejecuta (impresión, captura, motor sin soporte), el tablero se ve completo
+   en vez de quedar a medio dibujar.                                        */
+@media (prefers-reduced-motion: no-preference){
+  .anim-linea{stroke-dasharray:var(--largo);
+              animation:trazar 1.1s cubic-bezier(.4,0,.2,1) both;
+              animation-delay:var(--retraso,0s)}
+  .anim-area{animation:aparecer .8s ease-out both;
+             animation-delay:calc(var(--retraso,0s) + .35s)}
+  .anim-punto{animation:aparecer .4s ease-out both;
+              animation-delay:calc(var(--retraso,0s) + 1s)}
+  .anim-barra{transform-origin:var(--origen,left center);
+              animation:crecerX .75s cubic-bezier(.34,1.2,.64,1) both;
+              animation-delay:var(--retraso,0s)}
+  .anim-columna{transform-origin:bottom;
+                animation:crecerY .6s cubic-bezier(.34,1.2,.64,1) both;
+                animation-delay:var(--retraso,0s)}
+  .anim-entra{animation:subir .5s ease-out both;
+              animation-delay:var(--retraso,0s)}
+  .anim-valor{animation:aparecer .5s ease-out both;
+              animation-delay:calc(var(--retraso,0s) + .5s)}
+}
+@keyframes trazar{from{stroke-dashoffset:var(--largo)} to{stroke-dashoffset:0}}
+@keyframes aparecer{from{opacity:0} to{opacity:1}}
+@keyframes crecerX{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+@keyframes crecerY{from{transform:scaleY(0)} to{transform:scaleY(1)}}
+@keyframes subir{from{opacity:0;transform:translateY(10px)}
+                 to{opacity:1;transform:translateY(0)}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--text-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:12px;height:3px;border-radius:2px;display:inline-block}
@@ -235,6 +268,40 @@ footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);
    de superficie, barras ≤24px con extremo redondeado 4px, grilla hairline.
    ════════════════════════════════════════════════════════════════════════ */
 const NS = 'http://www.w3.org/2000/svg';
+
+/* Color por ENTIDAD, no por posición en el ranking.
+   Cada canal, red o taller conserva siempre el mismo color: si el orden
+   cambia (o se filtra), el lector no tiene que reaprender la leyenda.
+   Las 5 ranuras pasaron el validador de contraste y daltonismo en ambos modos. */
+const COLOR_ENTIDAD = {
+  // canales de captación
+  web: '--s1', facebook: '--s2', instagram: '--s3', podium: '--s4', referido: '--s5',
+  // redes sociales (instagram y facebook reusan su color de canal a proposito:
+  // es la misma entidad en los dos graficos. LinkedIn toma el azul, que ahi
+  // esta libre porque "web" no aparece en este grafico)
+  linkedin: '--s1', tiktok: '--s4',
+  // talleres
+  'robótica inicial': '--s1', 'programación con scratch': '--s2',
+  'ciencia en casa': '--s3', 'matemática lúdica': '--s4',
+};
+const RANURAS = ['--s1', '--s2', '--s3', '--s4', '--s5'];
+let _asignados = 0;
+const _memoria = {};
+
+/** Devuelve siempre el mismo color para el mismo nombre. */
+function colorDe(nombre) {
+  const clave = String(nombre || '').toLowerCase().trim();
+  if (COLOR_ENTIDAD[clave]) return COLOR_ENTIDAD[clave];
+  if (!_memoria[clave]) {
+    _memoria[clave] = RANURAS[_asignados % RANURAS.length];
+    _asignados++;
+  }
+  return _memoria[clave];
+}
+
+/* Las animaciones corren solo en el primer render: al cambiar de tema o
+   redimensionar sería una distracción, no información. */
+let animar = true;
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const fmt = (n, d = 0) => Number(n).toLocaleString('es-PE', {minimumFractionDigits: d, maximumFractionDigits: d});
 const compacto = (n) => {
@@ -354,22 +421,33 @@ function lineChart(cont, {series, alto = 260, sufijo = '', etiquetasDirectas = t
                 'stroke-width': 1, opacity: .3}, svg);
   }
 
-  series.forEach((s) => {
+  series.forEach((s, idxSerie) => {
     const col = css(s.color);
     const d = s.datos.map((p, i) => `${i ? 'L' : 'M'}${X(i)},${Y(p.valor)}`).join(' ');
     if (area && series.length === 1) {
       el('path', {d: `${d} L${X(n-1)},${h-pad.b} L${X(0)},${h-pad.b} Z`,
-                  fill: col, opacity: .10}, svg);
+                  fill: col, opacity: .10,
+                  class: animar ? 'anim-area' : ''}, svg);
     }
-    el('path', {d, fill: 'none', stroke: col, 'stroke-width': 2,
+    const trazo = el('path', {d, fill: 'none', stroke: col, 'stroke-width': 2,
                 'stroke-linejoin': 'round', 'stroke-linecap': 'round'}, svg);
+    if (animar) {
+      // el largo real del trazo alimenta la animación de dibujado
+      const largo = Math.ceil(trazo.getTotalLength ? trazo.getTotalLength() : 2000);
+      trazo.setAttribute('class', 'anim-linea');
+      trazo.setAttribute('style', `--largo:${largo};--retraso:${idxSerie * 0.18}s`);
+    }
     // marcador final con anillo de superficie (2px)
     const ux = X(n - 1), uy = Y(s.datos[n - 1].valor);
     el('circle', {cx: ux, cy: uy, r: 5, fill: col,
-                  stroke: css('--surface-1'), 'stroke-width': 2}, svg);
+                  stroke: css('--surface-1'), 'stroke-width': 2,
+                  class: animar ? 'anim-punto' : '',
+                  style: `--retraso:${idxSerie * 0.18}s`}, svg);
     if (etiquetasDirectas) {
       const t = el('text', {x: ux + 10, y: uy + 4, fill: css('--text-2'),
-                            'font-size': 11.5, 'font-weight': 600}, svg);
+                            'font-size': 11.5, 'font-weight': 600,
+                            class: animar ? 'anim-valor' : '',
+                            style: `--retraso:${idxSerie * 0.18 + 0.5}s`}, svg);
       t.textContent = s.nombre;
     }
   });
@@ -412,31 +490,45 @@ function barChart(cont, {datos, alto = null, sufijo = '', decimales = 0}) {
   datos = datos || [];
   if (sinDatos(cont, datos.length, 100)) return;
   const filas = datos.length;
-  const w = 560, fila = 34, pad = {t: 8, r: 58, b: 8, l: 124};
+  // El ancho de la columna de etiquetas se calcula segun el nombre mas largo,
+  // con un tope: nombres como "Programacion con Scratch" se cortaban.
+  const masLargo = Math.max(...datos.map(d => String(d.nombre).length), 4);
+  const anchoEtiq = Math.min(190, Math.max(90, masLargo * 6.6 + 12));
+  const w = 560, fila = 34, pad = {t: 8, r: 58, b: 8, l: anchoEtiq};
   const h = alto || (pad.t + pad.b + filas * fila);
   const svg = svgBase(cont, w, h);
   const max = Math.max(...datos.map(d => d.valor), 1);
-  const ramp = ['--seq-650', '--seq-550', '--seq-450', '--seq-350', '--seq-250', '--seq-100'];
   const tip = tooltip(cont);
 
   datos.forEach((d, i) => {
     const y = pad.t + i * fila + (fila - 22) / 2;
     const largo = Math.max(3, (d.valor / max) * (w - pad.l - pad.r));
-    const col = css(ramp[Math.min(i, ramp.length - 1)]);
+    // El color acompaña a la ENTIDAD (este canal, esta red), no a su puesto en
+    // el ranking: si cambia el orden, cada barra conserva su color.
+    const col = css(d.color || colorDe(d.nombre));
     // etiqueta de categoría (token de texto, nunca el color de la serie)
+    // si aun asi no cabe, se recorta con puntos suspensivos y el nombre
+    // completo queda disponible en el tooltip y en la vista de tablas
+    const cabe = Math.floor((anchoEtiq - 14) / 6.6);
+    const etiqueta = String(d.nombre).length > cabe
+      ? String(d.nombre).slice(0, cabe - 1).trimEnd() + '…'
+      : String(d.nombre);
     const lb = el('text', {x: pad.l - 10, y: y + 15, 'text-anchor': 'end',
                            fill: css('--text-2'), 'font-size': 12}, svg);
-    lb.textContent = d.nombre;
+    lb.textContent = etiqueta;
     // barra: 22px de grosor, extremo redondeado 4px, cuadrado en la base
     const r = el('path', {
       d: `M${pad.l},${y} H${pad.l + largo - 4} a4,4 0 0 1 4,4 V${y + 18}
           a4,4 0 0 1 -4,4 H${pad.l} Z`.replace(/\s+/g, ' '),
-      fill: col}, svg);
+      fill: col, class: animar ? 'anim-barra' : '',
+      style: `--retraso:${i * 0.07}s;--origen:${pad.l}px center`}, svg);
     r.style.cursor = 'pointer';
     // valor al final de la barra (etiqueta directa selectiva)
     const v = el('text', {x: pad.l + largo + 8, y: y + 15, fill: css('--text-1'),
                           'font-size': 12, 'font-weight': 600,
-                          style: 'font-variant-numeric:tabular-nums'}, svg);
+                          class: animar ? 'anim-valor' : '',
+                          style: 'font-variant-numeric:tabular-nums;'
+                                 + `--retraso:${i * 0.07}s`}, svg);
     v.textContent = fmt(d.valor, decimales) + sufijo;
 
     r.addEventListener('pointerenter', () => {
@@ -487,7 +579,8 @@ function columnChart(cont, {datos, alto = 240, sufijo = '%', umbral = null}) {
     const r = el('path', {
       d: `M${cx - ancho/2},${y + 4} a4,4 0 0 1 4,-4 H${cx + ancho/2 - 4}
           a4,4 0 0 1 4,4 V${y + alt} H${cx - ancho/2} Z`.replace(/\s+/g, ' '),
-      fill: col}, svg);
+      fill: col, class: animar ? 'anim-columna' : '',
+      style: `--retraso:${i * 0.05}s`}, svg);
     r.style.cursor = 'pointer';
     if (i % Math.ceil(n / 7) === 0 || i === n - 1) {
       const t = el('text', {x: cx, y: h - pad.b + 16, 'text-anchor': 'middle',
@@ -531,9 +624,28 @@ function sparkline(cont, datos) {
    Carga de datos y render
    ════════════════════════════════════════════════════════════════════════ */
 let DATOS = null;
-const REDES_COLOR = {instagram: '--s1', facebook: '--s2', linkedin: '--s3', tiktok: '--s4'};
+// los colores de las redes salen del mapa por entidad (colorDe)
 const REDES_NOMBRE = {instagram: 'Instagram', facebook: 'Facebook',
                       linkedin: 'LinkedIn', tiktok: 'TikTok'};
+
+/** Anima un número desde 0 hasta su valor. Si el sistema pide menos
+ *  movimiento, lo escribe directamente. */
+function contarHasta(nodo, valor, decimales = 0) {
+  // Se escribe primero el valor definitivo: si la animación no llega a
+  // ejecutarse, el número que queda en pantalla es el correcto.
+  nodo.textContent = fmt(valor, decimales);
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animar || quieto) return;
+  const dur = 900, t0 = performance.now();
+  const paso = (ahora) => {
+    const p = Math.min(1, (ahora - t0) / dur);
+    const suave = 1 - Math.pow(1 - p, 3);          // desacelera al final
+    nodo.textContent = fmt(valor * suave, decimales);
+    if (p < 1) requestAnimationFrame(paso);
+    else nodo.textContent = fmt(valor, decimales);
+  };
+  requestAnimationFrame(paso);
+}
 
 function deltaHTML(v, mejor) {
   if (!v) return '<span class="delta flat">sin cambio</span>';
@@ -552,16 +664,16 @@ function render() {
 
   // ── hero ──
   const hero = d.kpis.find(k => k.id === 'leads');
-  document.getElementById('heroVal').textContent = fmt(hero.valor);
+  contarHasta(document.getElementById('heroVal'), hero.valor);
   document.getElementById('heroDelta').outerHTML =
     deltaHTML(hero.variacion, hero.mejor).replace('class="delta', 'id="heroDelta" class="delta');
   sparkline(document.getElementById('heroSpark'), d.series.leads_dia_suavizado.slice(-30));
 
   // ── tiles ──
   const tiles = d.kpis.filter(k => k.id !== 'leads');
-  document.getElementById('kpis').innerHTML = tiles.map(k => {
+  document.getElementById('kpis').innerHTML = tiles.map((k, i) => {
     const dec = k.unidad === '%' ? 1 : (k.unidad.includes('día') ? 2 : 0);
-    return `<div class="tile">
+    return `<div class="tile${animar ? ' anim-entra' : ''}" style="--retraso:${i * 0.05}s">
       <div class="tile-lbl">${k.etiqueta}</div>
       <div class="tile-val">${k.valor >= 10000 ? compacto(k.valor) : fmt(k.valor, dec)}${k.unidad === '%' ? ' %' : (k.unidad || '')}</div>
       <div class="tile-foot">${deltaHTML(k.variacion, k.mejor)}<span>vs. período anterior</span></div>
@@ -577,7 +689,7 @@ function render() {
   // ── canales (volumen) ──
   const canales = Object.entries(d.desgloses.leads_por_canal)
     .map(([k, v]) => ({nombre: k.charAt(0).toUpperCase() + k.slice(1), valor: v,
-                       etiqueta: 'Leads',
+                       etiqueta: 'Leads', color: colorDe(k),
                        extra: {k: 'Conversión', v: (d.desgloses.conversion_por_canal[k] ?? 0).toFixed(1) + ' %'}}));
   barChart(document.getElementById('chCanales'), {datos: canales});
 
@@ -585,12 +697,12 @@ function render() {
   const conv = Object.entries(d.desgloses.conversion_por_canal)
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => ({nombre: k.charAt(0).toUpperCase() + k.slice(1), valor: v,
-                       etiqueta: 'Conversión'}));
+                       etiqueta: 'Conversión', color: colorDe(k)}));
   barChart(document.getElementById('chConversion'), {datos: conv, sufijo: ' %', decimales: 1});
 
   // ── redes (4 series categóricas: leyenda + etiquetas directas) ──
   const seriesRedes = Object.entries(d.series.alcance_por_red).map(([red, datos]) => ({
-    nombre: REDES_NOMBRE[red] || red, color: REDES_COLOR[red] || '--s1', datos,
+    nombre: REDES_NOMBRE[red] || red, color: colorDe(red), datos,
   }));
   lineChart(document.getElementById('chRedes'), {series: seriesRedes, alto: 280});
   document.getElementById('lgRedes').innerHTML = seriesRedes.map(s =>
@@ -612,10 +724,11 @@ function render() {
   // ── talleres ──
   const tall = Object.entries(d.desgloses.asistencia_por_taller)
     .sort((a, b) => b[1] - a[1])
-    .map(([k, v]) => ({nombre: k, valor: v, etiqueta: 'Asistencia'}));
+    .map(([k, v]) => ({nombre: k, valor: v, etiqueta: 'Asistencia', color: colorDe(k)}));
   barChart(document.getElementById('chTalleres'), {datos: tall, sufijo: ' %', decimales: 1});
 
   construirTablas();
+  animar = false;   // solo la primera vez; en resize o cambio de tema, no
 }
 
 /* ── Vista de tabla (canal de accesibilidad: nada depende solo del color) ── */
