@@ -2,7 +2,12 @@
 
 <p align="center"><i>Todas las métricas del programa en un enlace, sin servidor y sin dependencias</i></p>
 
-<p align="center">![tests](https://img.shields.io/badge/tests-26%20passed-brightgreen) ![deploy](https://img.shields.io/badge/deploy-Vercel-black) ![dependencias](https://img.shields.io/badge/dependencias-0-success) ![licencia](https://img.shields.io/badge/licencia-MIT-blue)</p>
+<p align="center">
+  <img alt="tests" src="https://img.shields.io/badge/tests-26%20passed-brightgreen">
+  <img alt="deploy" src="https://img.shields.io/badge/deploy-Vercel-black">
+  <img alt="dependencias" src="https://img.shields.io/badge/dependencias-0-success">
+  <img alt="licencia" src="https://img.shields.io/badge/licencia-MIT-blue">
+</p>
 
 ---
 
