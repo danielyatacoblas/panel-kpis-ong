@@ -5,3 +5,14 @@ __pycache__/
 .env
 .vercel
 public/_tmp*.html
+
+# ── Credenciales: nunca deben entrar al repositorio ──
+*token*
+*.token
+.env
+.env.*
+*secret*
+*credential*
+*.pem
+*.key
+!*.key.example
