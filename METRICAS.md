@@ -4,7 +4,7 @@
 > Cada métrica declara **qué mide, cómo se calcula, de dónde sale y quién
 > responde por ella**.
 
-Las métricas marcadas con ⭐ son **propuestas** que el aviso no listaba pero que
+Las métricas marcadas con  son **propuestas** que el aviso no listaba pero que
 cambian decisiones. Están implementadas y probadas.
 
 ---
@@ -15,8 +15,8 @@ cambian decisiones. Están implementadas y probadas.
 | --- | --- | --- | --- | --- |
 | **Leads generados** | Personas que dejaron sus datos en el período | `count(leads)` | CRM (Sheets) | Comunicaciones |
 | **Tasa de conversión** | % de leads que terminan inscritos en un programa | `convertidos / leads × 100` | CRM | Comunicaciones |
-| **Conversión por canal** ⭐ | Lo mismo, abierto por canal de origen | `convertidos[canal] / leads[canal] × 100` | CRM | Comunicaciones |
-| **Días a primera respuesta** ⭐ | Promedio de días hasta el primer contacto del equipo | `promedio(dias_a_primera_respuesta)` | CRM | Coordinación |
+| **Conversión por canal** | Lo mismo, abierto por canal de origen | `convertidos[canal] / leads[canal] × 100` | CRM | Comunicaciones |
+| **Días a primera respuesta** | Promedio de días hasta el primer contacto del equipo | `promedio(dias_a_primera_respuesta)` | CRM | Coordinación |
 
 **Por qué importan las dos últimas.** El volumen por canal dice *cuánta* gente
 llega; la conversión dice *cuál sirve*. Un canal puede traer el 30 % de los
@@ -43,7 +43,7 @@ El CTR sobre aperturas (CTOR) sube artificialmente cuando la apertura baja, y
 eso hace que una campaña mala parezca buena. Sobre enviados, las campañas son
 comparables entre sí.
 
-> ⚠️ La apertura depende de píxeles de seguimiento y está inflada/deflactada
+> La apertura depende de píxeles de seguimiento y está inflada/deflactada
 > por Apple Mail Privacy Protection. Sirve para comparar campañas entre sí, no
 > como número absoluto. **El clic es la métrica confiable.**
 
@@ -78,8 +78,8 @@ el dashboard la muestra junto a la tasa de interacción y no como titular.
 | Métrica | Definición | Fórmula | Fuente | Responsable |
 | --- | --- | --- | --- | --- |
 | **Beneficiarios activos** | Asistentes en la última jornada registrada | `suma(asistentes) de la última fecha` | Formularios de asistencia | Coordinación |
-| **Tasa de asistencia** ⭐ | % de inscritos que efectivamente asisten | `asistentes / inscritos × 100` | Formularios | Coordinación |
-| **Asistencia por taller** ⭐ | Lo mismo, abierto por taller | `asistentes[taller] / inscritos[taller] × 100` | Formularios | Coordinación |
+| **Tasa de asistencia** | % de inscritos que efectivamente asisten | `asistentes / inscritos × 100` | Formularios | Coordinación |
+| **Asistencia por taller** | Lo mismo, abierto por taller | `asistentes[taller] / inscritos[taller] × 100` | Formularios | Coordinación |
 
 **Por qué la asistencia y no solo los inscritos.** Inscribirse es gratis;
 asistir cuesta tiempo, transporte y ganas. La asistencia real mide la calidad

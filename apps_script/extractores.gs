@@ -5,11 +5,11 @@
  * "warehouse" una fila por día y por fuente. El dashboard lee de ahí.
  *
  * INSTALACIÓN
- *  1. Crea una Google Sheet con las pestañas: leads, email, redes, web, educacion, log
- *  2. Extensiones → Apps Script → pega este archivo
- *  3. Configuración del proyecto → Propiedades del script: agrega las claves
- *     (MAILCHIMP_API_KEY, MAILCHIMP_LIST_ID, META_TOKEN, GA4_PROPERTY_ID…)
- *  4. Activadores → Agregar activador → ejecutarTodo → Basado en tiempo → Diario 03:00
+ * 1. Crea una Google Sheet con las pestañas: leads, email, redes, web, educacion, log
+ * 2. Extensiones → Apps Script → pega este archivo
+ * 3. Configuración del proyecto → Propiedades del script: agrega las claves
+ * (MAILCHIMP_API_KEY, MAILCHIMP_LIST_ID, META_TOKEN, GA4_PROPERTY_ID…)
+ * 4. Activadores → Agregar activador → ejecutarTodo → Basado en tiempo → Diario 03:00
  *
  * NUNCA se escriben credenciales en el código: van en Propiedades del script.
  */
@@ -31,7 +31,7 @@ function ejecutarTodo() {
 
   // Si algo falló, avisar (no fallar en silencio).
   if (fallidos.length) {
-    notificar('⚠️ Extracción de KPIs con errores: ' +
+    notificar(' Extracción de KPIs con errores: ' +
               fallidos.map(f => f.fuente + ' (' + f.error + ')').join(', '));
   }
 }

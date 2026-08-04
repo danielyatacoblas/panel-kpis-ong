@@ -1,7 +1,7 @@
 # 03 · Dashboard de KPIs — todas las métricas del programa en un solo lugar
 
 [![tests](https://img.shields.io/badge/tests-26%20passed-brightgreen)](tests/)
-[![deploy](https://img.shields.io/badge/deploy-Vercel%20(gratis)-black)](#-publicarlo-gratis-en-vercel-5-minutos)
+[![deploy](https://img.shields.io/badge/deploy-Vercel%20(gratis)-black)](#publicarlo-gratis-en-vercel-5-minutos)
 [![sin dependencias](https://img.shields.io/badge/frontend-sin%20dependencias-informational)](public/index.html)
 [![licencia](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
 
@@ -11,7 +11,7 @@ métricas se miden y cómo se visualizan**.
 
 ---
 
-## 🎬 Qué es
+## Qué es
 
 Un dashboard **estático y gratuito** que centraliza los KPIs del programa:
 captación, email, redes, web y gestión educativa. Sin servidor, sin base de
@@ -44,7 +44,7 @@ Vista clara y oscura, ambas con la paleta validada para daltonismo
 
 ---
 
-## ⚡ Probarlo en 1 minuto
+## Probarlo en 1 minuto
 
 ```bash
 pip install pytest
@@ -88,7 +88,7 @@ KPIs calculados:
 
 ---
 
-## 🚀 Publicarlo gratis en Vercel (5 minutos)
+## Publicarlo gratis en Vercel (5 minutos)
 
 1. Sube este proyecto a GitHub (ver la guía del repo raíz).
 2. Entra a <https://vercel.com> → **Add New… → Project** → conecta tu GitHub.
@@ -106,7 +106,7 @@ solo al detectar el commit. Cero infraestructura que mantener.
 
 ---
 
-## 🔌 Conectar datos reales (cuando reemplaces la data ficticia)
+## Conectar datos reales (cuando reemplaces la data ficticia)
 
 1. Crea una Google Sheet con las pestañas `leads`, `email`, `redes`, `web`,
    `educacion`, `log` (mismas columnas que los CSV de `warehouse/`).
@@ -124,7 +124,7 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 
 ---
 
-## 📊 Decisiones de visualización (y por qué)
+## Decisiones de visualización (y por qué)
 
 - **Un solo eje por gráfico.** Nunca dos escalas Y: es la forma más común de
   mentir con un gráfico. Dos medidas distintas → dos gráficos.
@@ -156,7 +156,7 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 
 ---
 
-## 📁 Estructura
+## Estructura
 
 ```
 03_dashboard_kpis/
@@ -178,7 +178,7 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 
 ---
 
-## 🧪 Qué está probado
+## Qué está probado
 
 | Área | Tests |
 | --- | --- |
@@ -192,8 +192,8 @@ El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
 
 ---
 
-## 📌 Estado
+## Estado
 
-✅ **Funcional, probado y listo para desplegar.** 26 tests en verde, dashboard
+ **Funcional, probado y listo para desplegar.** 26 tests en verde, dashboard
 verificado visualmente en modo claro y oscuro, data ficticia de 90 días
 incluida y actualización automática configurada.
