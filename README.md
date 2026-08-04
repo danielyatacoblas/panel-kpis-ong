@@ -11,7 +11,7 @@
 
 ---
 
-## 🎥 Demo en video
+## Demo en video
 
 <!-- ────────────────────────────────────────────────────────────────────
      ESPACIO RESERVADO PARA EL VIDEO
@@ -24,16 +24,16 @@
      Y borra el aviso de abajo.
      ──────────────────────────────────────────────────────────────────── -->
 
-> 🎬 *Video de la demo en camino.* Mientras tanto, el proyecto corre completo
-> en local en menos de dos minutos siguiendo [⚡ Probarlo](#-probarlo-en-2-minutos).
+> *Video de la demo en camino.* Mientras tanto, el proyecto corre completo
+> en local en menos de dos minutos siguiendo [Probarlo](#probarlo-en-2-minutos).
 
 ---
 
-## 🎯 El problema
+## El problema
 
 Los números del programa vivían repartidos entre el CRM, Mailchimp, las redes, Google Analytics y las hojas de asistencia. Armar un reporte significaba abrir cinco pestañas y copiar a mano, así que se hacía tarde o simplemente no se hacía.
 
-## 💡 Qué hace este proyecto
+## Qué hace este proyecto
 
 1. **Una sola pantalla** con captación, email, redes, web y gestión educativa.
 2. **Se actualiza solo** cada madrugada, sin servidor que mantener.
@@ -43,26 +43,26 @@ Los números del programa vivían repartidos entre el CRM, Mailchimp, las redes,
 
 ---
 
-## 🗺️ Cómo funciona
+## Cómo funciona
 
 ```mermaid
 flowchart LR
-    subgraph FUENTES ["📥 Fuentes"]
+    subgraph FUENTES [" Fuentes"]
         A["CRM<br/>leads"]
         B["Mailchimp<br/>email"]
         C["Meta · LinkedIn<br/>TikTok"]
         D["GA4<br/>web"]
         E["Formularios<br/>asistencia"]
     end
-    FUENTES -->|Apps Script + n8n<br/>cada madrugada| W["🗄️ Warehouse<br/>histórico diario"]
-    W -->|construir_dashboard.py| J["📦 datos.json"]
-    J --> V["🌐 Panel estático<br/>en Vercel"]
-    V --> U["👀 El equipo abre<br/>un solo enlace"]
+    FUENTES -->|Apps Script + n8n<br/>cada madrugada| W[" Warehouse<br/>histórico diario"]
+    W -->|construir_dashboard.py| J[" datos.json"]
+    J --> V[" Panel estático<br/>en Vercel"]
+    V --> U[" El equipo abre<br/>un solo enlace"]
 ```
 
 ---
 
-## ⚡ Probarlo en 2 minutos
+## Probarlo en 2 minutos
 
 ```bash
 pip install pytest
@@ -76,7 +76,7 @@ sin levantar servidor.
 
 ---
 
-### 📉 Un tablero que solo dice "todo bien" no sirve
+### Un tablero que solo dice "todo bien" no sirve
 
 La data ficticia esconde **a propósito** un problema: la apertura de email viene cayendo. El panel lo detecta solo y muestra la alerta con la recomendación concreta.
 
@@ -84,7 +84,7 @@ También propone métricas que no estaban pedidas pero **cambian decisiones**: l
 
 ---
 
-## 📁 Estructura
+## Estructura
 
 ```
 ├── public/
@@ -100,7 +100,7 @@ También propone métricas que no estaban pedidas pero **cambian decisiones**: l
 
 ---
 
-## 🌿 Flujo de trabajo con Git
+## Flujo de trabajo con Git
 
 El repositorio sigue **Git Flow**: `main` siempre desplegable, `develop` como
 integración, y una rama por cambio. Los merges son `--no-ff` para que cada
@@ -145,7 +145,7 @@ cuerpo, no solo el qué.
 
 ---
 
-## 📚 Documentación
+## Documentación
 
 | Documento | Contenido |
 | --- | --- |
@@ -154,7 +154,7 @@ cuerpo, no solo el qué.
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 [MIT](LICENSE) · Daniel Yataco Blas
 
