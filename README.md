@@ -1,199 +1,157 @@
-# 03 · Dashboard de KPIs — todas las métricas del programa en un solo lugar
+<h1 align="center">Panel de KPIs para una ONG</h1>
 
-[![tests](https://img.shields.io/badge/tests-26%20passed-brightgreen)](tests/)
-[![deploy](https://img.shields.io/badge/deploy-Vercel%20(gratis)-black)](#-publicarlo-gratis-en-vercel-5-minutos)
-[![sin dependencias](https://img.shields.io/badge/frontend-sin%20dependencias-informational)](public/index.html)
-[![licencia](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
+<p align="center"><i>Todas las métricas del programa en un enlace, sin servidor y sin dependencias</i></p>
 
-**Qué requisitos del aviso cubre:** construir y mantener un dashboard de KPIs · automatizar la
-actualización desde CRM, redes, email y formularios · **proponer mejoras a qué
-métricas se miden y cómo se visualizan**.
+<p align="center">![tests](https://img.shields.io/badge/tests-26%20passed-brightgreen) ![deploy](https://img.shields.io/badge/deploy-Vercel-black) ![dependencias](https://img.shields.io/badge/dependencias-0-success) ![licencia](https://img.shields.io/badge/licencia-MIT-blue)</p>
 
 ---
 
-## 🎬 Qué es
+## 🎥 Demo en video
 
-Un dashboard **estático y gratuito** que centraliza los KPIs del programa:
-captación, email, redes, web y gestión educativa. Sin servidor, sin base de
-datos, sin librerías externas — se despliega en Vercel y cuesta S/ 0.
+<!-- ────────────────────────────────────────────────────────────────────
+     ESPACIO RESERVADO PARA EL VIDEO
 
-```
-CRM · Mailchimp · Meta/LinkedIn/TikTok · GA4 · Formularios
-        │  (Apps Script + n8n, cada madrugada)
-        ▼
-   warehouse/  (histórico diario, una tabla por fuente)
-        │  python scripts/construir_dashboard.py
-        ▼
-   public/datos.json  ──►  dashboard estático  ──►  Vercel (URL pública)
-```
+     Cuando lo tengas subido a YouTube (recomiendo "no listado"), reemplaza
+     este bloque por la miniatura clickeable:
 
-### Cómo se ve
+     [![Ver la demo](https://img.youtube.com/vi/TU_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/TU_VIDEO_ID)
 
-Vista clara y oscura, ambas con la paleta validada para daltonismo
-(el validador de contraste/CVD pasa en los dos modos):
+     Y borra el aviso de abajo.
+     ──────────────────────────────────────────────────────────────────── -->
 
-| Bloque | Forma elegida | Por qué |
-| --- | --- | --- |
-| Leads generados | **Hero** (número grande + variación + sparkline) | Es el número que lidera el tablero |
-| 9 indicadores | **Fila de tiles** con delta vs período anterior | Un vistazo, sin gráficos innecesarios |
-| Captación diaria | Línea + media móvil de 7 días | La estacionalidad semanal tapa la tendencia |
-| Canales | Barras con rampa secuencial | Comparar magnitudes, no identidades |
-| Alcance por red | 4 líneas categóricas + leyenda + etiquetas directas | Las series *son* el tema |
-| Apertura de email | Columnas + línea de promedio | Detecta campañas bajo el promedio |
-| Asistencia por taller | Barras | Comparación simple entre 4 talleres |
+> 🎬 *Video de la demo en camino.* Mientras tanto, el proyecto corre completo
+> en local en menos de dos minutos siguiendo [⚡ Probarlo](#-probarlo-en-2-minutos).
 
 ---
 
-## ⚡ Probarlo en 1 minuto
+## 🎯 El problema
+
+Los números del programa vivían repartidos entre el CRM, Mailchimp, las redes, Google Analytics y las hojas de asistencia. Armar un reporte significaba abrir cinco pestañas y copiar a mano, así que se hacía tarde o simplemente no se hacía.
+
+## 💡 Qué hace este proyecto
+
+1. **Una sola pantalla** con captación, email, redes, web y gestión educativa.
+2. **Se actualiza solo** cada madrugada, sin servidor que mantener.
+3. **Detecta problemas**, no solo los muestra: si la apertura de email cae, lo dice y sugiere qué revisar.
+4. **Cero dependencias**: los gráficos son SVG escrito a mano, así que no hay librerías que actualizar ni que se rompan.
+5. **Accesible de verdad**: paleta validada para daltonismo, modo claro y oscuro, y una vista de tablas para que nada dependa solo del color.
+
+---
+
+## 🗺️ Cómo funciona
+
+```mermaid
+flowchart LR
+    subgraph FUENTES ["📥 Fuentes"]
+        A["CRM<br/>leads"]
+        B["Mailchimp<br/>email"]
+        C["Meta · LinkedIn<br/>TikTok"]
+        D["GA4<br/>web"]
+        E["Formularios<br/>asistencia"]
+    end
+    FUENTES -->|Apps Script + n8n<br/>cada madrugada| W["🗄️ Warehouse<br/>histórico diario"]
+    W -->|construir_dashboard.py| J["📦 datos.json"]
+    J --> V["🌐 Panel estático<br/>en Vercel"]
+    V --> U["👀 El equipo abre<br/>un solo enlace"]
+```
+
+---
+
+## ⚡ Probarlo en 2 minutos
 
 ```bash
 pip install pytest
-python scripts/generar_warehouse.py       # 90 días de data ficticia
-python scripts/construir_dashboard.py     # calcula KPIs → public/datos.json
-python -m pytest tests/ -v                # 26 tests
-node tests/probar_graficos_vacios.mjs     # gráficos con datos vacíos
+python scripts/generar_warehouse.py     # 90 días de data ficticia
+python scripts/construir_dashboard.py   # calcula KPIs → datos.json
+python -m pytest -v                     # 26 tests
 ```
 
-Para verlo, **abre `public/index.html` con doble clic** — funciona tal cual, sin
-servidor. O sírvelo si prefieres:
-
-```bash
-cd public && python -m http.server 8899   # → http://localhost:8899
-```
-
-> El tablero carga `datos.json` cuando está servido y cae a una copia embebida
-> (`datos.js`) cuando se abre con `file://`, donde el navegador bloquea `fetch`
-> por CORS. Así nadie ve un dashboard roto por abrirlo "mal".
-
-Salida real de `construir_dashboard.py`:
-
-```
-KPIs calculados:
-  Leads generados                226.00        ▲ +3.7 % vs período anterior
-  Tasa de conversión              33.63%       ▲ +1.8 % vs período anterior
-  Días a primera respuesta         0.92 días   ▼ -4.2 % vs período anterior
-  Apertura de email               27.81%       ▼ -12.2 % vs período anterior
-  Clics de email                   4.11%       ▼ -24.0 % vs período anterior
-  Alcance en redes            79,478.00        ▲ +5.5 % vs período anterior
-  Interacción en redes             5.61%       ▲ +7.9 % vs período anterior
-  Sesiones web                 7,622.00        ▲ +6.7 % vs período anterior
-  Asistencia a talleres           68.61%       ▼ -1.5 % vs período anterior
-  Beneficiarios activos           58.00        ▼ -15.9 % vs período anterior
-```
-
-> La data ficticia esconde a propósito **un problema detectable**: la apertura
-> de email cae en las últimas semanas. El dashboard lo detecta solo y muestra
-> una alerta con la recomendación. Un tablero que solo dice "todo bien" no
-> sirve para nada.
+Para verlo, **abre `public/index.html` con doble clic** — funciona tal cual,
+sin levantar servidor.
 
 ---
 
-## 🚀 Publicarlo gratis en Vercel (5 minutos)
+### 📉 Un tablero que solo dice "todo bien" no sirve
 
-1. Sube este proyecto a GitHub (ver la guía del repo raíz).
-2. Entra a <https://vercel.com> → **Add New… → Project** → conecta tu GitHub.
-3. Elige el repositorio. Vercel detecta `vercel.json`; confirma:
-   - **Framework Preset:** `Other`
-   - **Build Command:** *(vacío)*
-   - **Output Directory:** `public`
-4. **Deploy**. En ~30 s tendrás una URL tipo
-   `https://club-stem-kpis.vercel.app` — pública, con HTTPS y CDN, gratis.
+La data ficticia esconde **a propósito** un problema: la apertura de email viene cayendo. El panel lo detecta solo y muestra la alerta con la recomendación concreta.
 
-**Actualización automática sin servidor:** el workflow
-`.github/workflows/actualizar-datos.yml` regenera `datos.json` cada madrugada
-con GitHub Actions (gratis), corre los tests y hace push; Vercel redespliega
-solo al detectar el commit. Cero infraestructura que mantener.
-
----
-
-## 🔌 Conectar datos reales (cuando reemplaces la data ficticia)
-
-1. Crea una Google Sheet con las pestañas `leads`, `email`, `redes`, `web`,
-   `educacion`, `log` (mismas columnas que los CSV de `warehouse/`).
-2. Pega `apps_script/extractores.gs` en Extensiones → Apps Script.
-3. Guarda las credenciales en **Propiedades del script** (nunca en el código):
-   `MAILCHIMP_API_KEY`, `MAILCHIMP_LIST_ID`, `META_TOKEN`, `IG_USER_ID`,
-   `GA4_PROPERTY_ID`.
-4. Activadores → `ejecutarTodo` → diario 03:00.
-5. En `construir_dashboard.py`, cambia la lectura de CSV por la descarga de la
-   hoja (`https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv`).
-
-El extractor ya trae lo que se olvida siempre: **cada fuente corre aislada**
-(si Mailchimp falla, GA4 igual se extrae), **deduplicación por fecha**,
-**log de cada corrida** y **alerta por correo si algo falla**.
-
----
-
-## 📊 Decisiones de visualización (y por qué)
-
-- **Un solo eje por gráfico.** Nunca dos escalas Y: es la forma más común de
-  mentir con un gráfico. Dos medidas distintas → dos gráficos.
-- **Paleta validada, no elegida a ojo.** Se corrió el validador de
-  contraste/daltonismo sobre los 5 colores en modo claro y oscuro. Los 5 pasan
-  las separaciones CVD; por eso las líneas llevan además **etiqueta directa**.
-- **El color acompaña a la entidad, no al ranking.** Facebook es siempre
-  naranja, Instagram siempre verde, TikTok siempre amarillo — en todos los
-  gráficos. Si cambia el orden o se filtra, el lector no reaprende la leyenda.
-  Está verificado que ningún gráfico repita color entre sus series.
-- **Animaciones que dirigen la mirada, no que decoran.** La línea se dibuja,
-  las barras crecen desde su base, los números cuentan hacia arriba. Se
-  ejecutan **solo en la primera carga**: al cambiar de tema o redimensionar
-  serían una distracción.
-- **Las animaciones no pueden dejar el tablero a medias.** El estado final es
-  el predeterminado y la animación parte desde el inicial dentro del keyframe:
-  si no llega a ejecutarse (impresión, captura, motor sin soporte), se ve
-  completo igual. Y con `prefers-reduced-motion` no se ejecutan en absoluto.
-- **El color nunca es el único canal.** Leyenda + etiquetas directas + botón
-  **"Ver tablas"** que muestra todos los datos en tablas accesibles.
-- **Etiquetas selectivas.** Valor en la punta de cada barra y al final de cada
-  línea; nunca un número sobre cada punto.
-- **Ejes con números redondos** y grilla de 1px recesiva: el dato es lo único
-  que debe destacar.
-- **Media móvil visible junto al dato crudo**, para que nadie confunda
-  suavizado con realidad.
-- **Modo oscuro seleccionado**, no invertido: los colores oscuros son otros
-  pasos de la misma rampa, validados contra el fondo oscuro.
+También propone métricas que no estaban pedidas pero **cambian decisiones**: la conversión *por canal* (un canal puede traer muchos leads y convertir poco) y la asistencia real a talleres (inscribirse es gratis; asistir cuesta tiempo y transporte).
 
 ---
 
 ## 📁 Estructura
 
 ```
-03_dashboard_kpis/
 ├── public/
-│   ├── index.html          # dashboard completo (HTML+CSS+JS, sin dependencias)
-│   ├── datos.json          # generado; lo consume el front cuando está servido
-│   └── datos.js            # generado; copia embebida para abrir sin servidor
-├── src/kpis.py             # todas las fórmulas (una función por métrica)
-├── scripts/
-│   ├── generar_warehouse.py    # 90 días de data ficticia reproducible
-│   └── construir_dashboard.py  # warehouse → KPIs → datos.json
-├── warehouse/              # histórico por fuente (CSV)
-├── apps_script/extractores.gs  # extracción real programada
-├── tests/test_kpis.py      # 26 tests, incluido el contrato con el front
-├── .github/workflows/      # actualización automática gratis
-├── vercel.json             # configuración de despliegue
-└── METRICAS.md             # diccionario de métricas
+│   ├── index.html          # el panel completo (HTML + CSS + SVG, sin librerías)
+│   ├── datos.json          # generado; lo consume el panel
+│   └── datos.js            # copia embebida para abrirlo sin servidor
+├── src/kpis.py             # todas las fórmulas, una por métrica
+├── warehouse/              # histórico por fuente
+├── apps_script/            # extracción real programada
+├── scripts/                # data ficticia y construcción del panel
+└── tests/                  # 26 tests + prueba de gráficos vacíos
 ```
 
 ---
 
-## 🧪 Qué está probado
+## 🌿 Flujo de trabajo con Git
 
-| Área | Tests |
+El repositorio sigue **Git Flow**: `main` siempre desplegable, `develop` como
+integración, y una rama por cambio. Los merges son `--no-ff` para que cada
+funcionalidad quede como un bloque legible en el historial, y cada versión
+lleva su tag.
+
+```mermaid
+gitGraph
+   commit id: "chore: repo setup"
+   branch develop
+   checkout develop
+   branch feature/core
+   commit id: "feat: core logic"
+   checkout develop
+   merge feature/core
+   branch feature/tests
+   commit id: "test: suite"
+   checkout develop
+   merge feature/tests
+   checkout main
+   merge develop tag: "v1.0.0"
+   checkout develop
+   branch fix/review
+   commit id: "fix: review findings"
+   checkout develop
+   merge fix/review
+   checkout main
+   merge develop tag: "v1.1.0"
+```
+
+| Rama | Para qué |
 | --- | --- |
-| Fórmulas | Cada KPI con valores calculados a mano |
-| Bordes | Denominador cero → 0, listas vacías, sin infinitos |
-| Ventanas | El período anterior **no se solapa** y es del mismo largo |
-| Series | Días sin datos se rellenan con 0; media móvil correcta |
-| Multi-serie | Todas las series comparten el mismo eje temporal *(este test encontró un bug real durante el desarrollo)* |
-| Contrato | `datos.json` tiene exactamente la forma que el dashboard espera |
-| Gráficos | Con una fuente vacía muestran "sin datos" en vez de romper el tablero *(bug encontrado en revisión)* |
+| `main` | Solo versiones liberadas. Cada merge lleva su tag. |
+| `develop` | Integración de todo lo terminado. |
+| `feature/*` | Una funcionalidad nueva. |
+| `fix/*` | Una corrección concreta. |
+| `release/*` | Preparación de la versión, luego se fusiona a `main` y `develop`. |
+
+Los mensajes siguen [Conventional Commits](https://www.conventionalcommits.org/):
+`feat:`, `fix:`, `test:`, `docs:`, `chore:` — con el porqué del cambio en el
+cuerpo, no solo el qué.
 
 ---
 
-## 📌 Estado
+## 📚 Documentación
 
-✅ **Funcional, probado y listo para desplegar.** 26 tests en verde, dashboard
-verificado visualmente en modo claro y oscuro, data ficticia de 90 días
-incluida y actualización automática configurada.
+| Documento | Contenido |
+| --- | --- |
+| [`GUIA.md`](GUIA.md) | Guía técnica completa: arquitectura, decisiones, configuración y puesta en marcha |
+| [`METRICAS.md`](METRICAS.md) | Diccionario de métricas: definición, fórmula, fuente, responsable y lo que deliberadamente no medimos |
+
+---
+
+## 📄 Licencia
+
+[MIT](LICENSE) · Daniel Yataco Blas
+
+> Proyecto de demostración construido con **datos ficticios**. No es un sistema
+> en producción de ninguna organización.
