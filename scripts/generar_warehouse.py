@@ -182,7 +182,8 @@ def _escribir(nombre: str, filas: list[dict]):
     OUT.mkdir(parents=True, exist_ok=True)
     p = OUT / nombre
     with p.open("w", newline="", encoding="utf-8") as f:
-        wr = csv.DictWriter(f, fieldnames=list(filas[0].keys()))
+        wr = csv.DictWriter(f, fieldnames=list(filas[0].keys(, lineterminator="
+")))
         wr.writeheader()
         wr.writerows(filas)
     print(f"  ✓ {p.name:<22} {len(filas):>5} filas")
