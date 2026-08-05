@@ -12,6 +12,58 @@
 
 ---
 
+## Para qué existe este repositorio
+
+Los números de un programa social viven repartidos: los leads en el CRM, las
+campañas en Mailchimp, el alcance en las redes, las visitas en Analytics y la
+asistencia en hojas de cálculo. Armar el reporte mensual significaba abrir cinco
+pestañas y copiar a mano, y como costaba una mañana entera se hacía tarde o no
+se hacía. Sin números, las decisiones se toman por intuición.
+
+**Este proyecto convierte esas cinco fuentes en un solo enlace que se actualiza
+solo cada madrugada, y que además señala qué hay que mirar.**
+
+```mermaid
+flowchart LR
+    subgraph ORIGEN ["Cinco fuentes, cinco formatos"]
+        direction TB
+        A["CRM<br/>leads, canal, conversión"]
+        B["Mailchimp<br/>envíos, aperturas, clics"]
+        C["Meta · LinkedIn · TikTok<br/>alcance e interacción"]
+        D["Google Analytics 4<br/>sesiones y páginas"]
+        E["Formularios<br/>asistencia a talleres"]
+    end
+
+    A --> R
+    B --> R
+    C --> R
+    D --> R
+    E --> R
+
+    R{{"Recolección automática<br/>Apps Script + n8n<br/>cada madrugada, 03:00"}}
+    R --> W[("Warehouse<br/>histórico diario<br/>180 días en CSV")]
+    W --> K["Cálculo de KPIs<br/>ventanas de 30, 60 y 90 días<br/>con su período anterior"]
+    K --> J["datos.json"]
+    J --> P["Panel estático<br/>sin servidor, sin dependencias"]
+
+    P --> U1["El equipo abre<br/>un enlace"]
+    P --> U2["El asistente dice<br/>qué revisar"]
+
+    style R fill:#2a78d6,color:#fff,stroke:#2a78d6
+    style P fill:#1baf7a,color:#fff,stroke:#1baf7a
+    style W fill:#eda100,color:#fff,stroke:#eda100
+```
+
+Las tres piezas que sostienen el diagrama:
+
+| Pieza | Por qué está ahí |
+| --- | --- |
+| **Warehouse histórico** | Guardar solo el dato de hoy impide comparar. Se conservan 180 días porque una ventana de 90 necesita otros 90 detrás para que su variación signifique algo y no sea un artefacto de la falta de datos. |
+| **Cálculo en Python, no en el navegador** | Cada ventana se calcula contra el warehouse con su propio período de comparación. Reescalar en el navegador daría números que parecen ciertos y no lo son. |
+| **Panel estático** | Una organización sin equipo técnico no puede mantener un servidor ni actualizar librerías cada seis meses. Es un HTML que se despliega gratis. |
+
+---
+
 ## Demo en video
 
 <!-- ────────────────────────────────────────────────────────────────────
@@ -29,10 +81,6 @@
 > en local en menos de dos minutos siguiendo [Probarlo](#probarlo-en-2-minutos).
 
 ---
-
-## El problema
-
-Los números del programa vivían repartidos entre el CRM, Mailchimp, las redes, Google Analytics y las hojas de asistencia. Armar un reporte significaba abrir cinco pestañas y copiar a mano, así que se hacía tarde o simplemente no se hacía.
 
 ## Qué hace este proyecto
 
@@ -86,22 +134,9 @@ Con los datos de demostración, en la ventana de 30 días:
 | Vigilar | 4 de cada 10 inscritos no llega al taller |
 | Sostener | El alcance en redes sube un 44.6 % |
 
-## Cómo funciona
+## Cómo funciona por dentro
 
-```mermaid
-flowchart LR
-    subgraph FUENTES ["Fuentes"]
-        A["CRM<br/>leads"]
-        B["Mailchimp<br/>email"]
-        C["Meta · LinkedIn<br/>TikTok"]
-        D["GA4<br/>web"]
-        E["Formularios<br/>asistencia"]
-    end
-    FUENTES -->|Apps Script + n8n<br/>cada madrugada| W["Warehouse<br/>histórico diario"]
-    W -->|construir_dashboard.py| J["datos.json"]
-    J --> V["Panel estático<br/>en Vercel"]
-    V --> U["El equipo abre<br/>un solo enlace"]
-```
+El recorrido completo está en el diagrama de arriba. Estas son las piezas de código que lo ejecutan:
 
 ---
 
