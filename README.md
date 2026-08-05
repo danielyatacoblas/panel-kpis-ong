@@ -47,17 +47,17 @@ Los números del programa vivían repartidos entre el CRM, Mailchimp, las redes,
 
 ```mermaid
 flowchart LR
-    subgraph FUENTES [" Fuentes"]
+    subgraph FUENTES ["Fuentes"]
         A["CRM<br/>leads"]
         B["Mailchimp<br/>email"]
         C["Meta · LinkedIn<br/>TikTok"]
         D["GA4<br/>web"]
         E["Formularios<br/>asistencia"]
     end
-    FUENTES -->|Apps Script + n8n<br/>cada madrugada| W[" Warehouse<br/>histórico diario"]
-    W -->|construir_dashboard.py| J[" datos.json"]
-    J --> V[" Panel estático<br/>en Vercel"]
-    V --> U[" El equipo abre<br/>un solo enlace"]
+    FUENTES -->|Apps Script + n8n<br/>cada madrugada| W["Warehouse<br/>histórico diario"]
+    W -->|construir_dashboard.py| J["datos.json"]
+    J --> V["Panel estático<br/>en Vercel"]
+    V --> U["El equipo abre<br/>un solo enlace"]
 ```
 
 ---
