@@ -67,18 +67,19 @@ Las tres piezas que sostienen el diagrama:
 ## Demo en video
 
 <!-- ────────────────────────────────────────────────────────────────────
-     ESPACIO RESERVADO PARA EL VIDEO
+     ESPACIO RESERVADO PARA EL REPRODUCTOR
 
-     Cuando lo tengas subido a YouTube (recomiendo "no listado"), reemplaza
-     este bloque por la miniatura clickeable:
-
-     [![Ver la demo](https://img.youtube.com/vi/TU_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/TU_VIDEO_ID)
-
-     Y borra el aviso de abajo.
+     El archivo está en docs/video_kpi.mp4, pero GitHub lo sirve como
+     application/octet-stream y el navegador no lo reproduce desde ahí.
+     Para incrustar el reproductor hace falta una URL de attachment:
+     arrastra el archivo a un issue nuevo, copia la URL
+     https://github.com/user-attachments/assets/... que genera, cancela el
+     issue, y pega esa URL sola en su propia línea aquí abajo sustituyendo
+     el enlace de descarga.
      ──────────────────────────────────────────────────────────────────── -->
 
-> *Video de la demo en camino.* Mientras tanto, el proyecto corre completo
-> en local en menos de dos minutos siguiendo [Probarlo](#probarlo-en-2-minutos).
+[Descargar la grabación](docs/video_kpi.mp4) (4,0 MB) · los indicadores, el
+selector de período, el filtro de canales y el asistente de análisis.
 
 ---
 
