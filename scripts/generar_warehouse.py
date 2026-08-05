@@ -29,7 +29,10 @@ OUT = ROOT / "warehouse"
 
 random.seed(2026)
 
-DIAS = 90
+# 180 días, no 90: el tablero deja elegir ventanas de 30, 60 y 90 días, y cada
+# una se compara contra el período inmediatamente anterior. Con solo 90 días de
+# historia la comparación de 90 no tendría contra qué medirse.
+DIAS = 180
 HOY = date(2026, 7, 30)
 INICIO = HOY - timedelta(days=DIAS - 1)
 
@@ -39,8 +42,9 @@ REDES = ["instagram", "facebook", "linkedin", "tiktok"]
 TALLERES = ["Robótica Inicial", "Programación con Scratch",
             "Ciencia en Casa", "Matemática Lúdica"]
 
-# días con campaña (picos de tráfico y leads)
-CAMPANAS = {INICIO + timedelta(days=d) for d in (12, 34, 56, 78)}
+# días con campaña (picos de tráfico y leads), aproximadamente uno al mes
+CAMPANAS = {INICIO + timedelta(days=d)
+            for d in (12, 34, 56, 78, 100, 122, 144, 166)}
 
 
 def _estacional(d: date) -> float:
@@ -49,7 +53,7 @@ def _estacional(d: date) -> float:
 
 
 def _tendencia(i: int) -> float:
-    """Crecimiento suave del 35 % en los 90 días."""
+    """Crecimiento suave del 35 % a lo largo de toda la historia."""
     return 1 + 0.35 * (i / DIAS)
 
 
@@ -182,7 +186,10 @@ def _escribir(nombre: str, filas: list[dict]):
     OUT.mkdir(parents=True, exist_ok=True)
     p = OUT / nombre
     with p.open("w", newline="", encoding="utf-8") as f:
-        wr = csv.DictWriter(f, fieldnames=list(filas[0].keys()))
+        # lineterminator explícito: csv escribe CRLF por omisión y en Windows
+        # el archivo saldría distinto al que regenera el CI en Linux.
+        wr = csv.DictWriter(f, fieldnames=list(filas[0].keys()),
+                            lineterminator="\n")
         wr.writeheader()
         wr.writerows(filas)
     print(f"  ✓ {p.name:<22} {len(filas):>5} filas")

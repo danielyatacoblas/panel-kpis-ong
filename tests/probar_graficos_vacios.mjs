@@ -58,7 +58,9 @@ const preparar = new Function(`
   const location = { protocol: 'http:' };
   const fetch = () => Promise.reject(new Error('sin red en el test'));
   const addEventListener = () => {};
-  const matchMedia = () => ({ matches: false });
+  const matchMedia = () => ({ matches: false, addEventListener() {} });
+  const setTimeout = () => 0, clearTimeout = () => {};
+  const requestAnimationFrame = () => 0, cancelAnimationFrame = () => {};
   ${codigo}
   return { lineChart, barChart, columnChart, sparkline, escala };
 `);

@@ -128,3 +128,52 @@ número de inscritos esconde.
 Si una fuente falla dos días seguidos, el extractor envía alerta al responsable
 (ver `apps_script/extractores.gs`). El dashboard muestra la fecha de última
 actualización para que nadie tome decisiones con datos viejos sin saberlo.
+
+---
+
+## 9. Asistente de análisis
+
+El asistente no es un modelo de lenguaje: es un conjunto de reglas que leen los
+KPIs y desgloses del período activo. Vive en `public/index.html`, función
+`hallazgos()`, y sus tests están en `tests/probar_asistente.mjs`.
+
+### Las reglas
+
+| Regla | Se dispara cuando | Nivel |
+| --- | --- | --- |
+| Canal líder que no convierte | El canal con más volumen queda por debajo de la mediana de conversión | Decidir |
+| Canal líder que sí convierte | El canal con más volumen queda por encima de la mediana | Sostener |
+| Oportunidad desaprovechada | El canal con mejor conversión aporta menos del 25 % del volumen | Vigilar |
+| Caída de apertura de email | Las últimas 3 campañas promedian menos del 90 % del promedio del período | Decidir |
+| Mayor retroceso | El KPI con peor variación, respetando si "mejor" es arriba o abajo | Decidir si cae más del 10 %, si no Vigilar |
+| Mayor avance | El KPI con mejor variación | Sostener |
+| Asistencia baja | La asistencia real cae por debajo del 75 % | Vigilar |
+
+Las cifras de cada texto salen del dato, nunca están escritas a mano: si la
+asistencia sube, el titular deja de decir "4 de cada 10".
+
+### Por qué determinista y no un modelo
+
+Las afirmaciones de este panel mueven presupuesto. Un modelo redacta mejor pero
+puede afirmar lo que los datos no dicen, y sobre un tablero eso es peor que no
+decir nada. Las reglas se pueden auditar una por una, se pueden probar con
+datos conocidos, y el mismo período da siempre el mismo texto.
+
+Además, así el tablero desplegado no necesita credenciales ni tiene coste por
+consulta: sigue siendo un archivo estático.
+
+### Conectarlo a un modelo real
+
+Toda la generación de texto está en una función:
+
+```js
+function responder(pregunta) { ... }   // devuelve {texto, lista}
+```
+
+Para usar un modelo, se reemplaza por una llamada a la API pasándole
+`vista()` (los KPIs y desgloses del período) y se devuelve la misma forma. El
+resto del tablero no se entera.
+
+Lo razonable en producción es lo híbrido: que las reglas sigan decidiendo
+**qué** es relevante —eso es auditable— y que el modelo solo redacte el
+resumen. Así nunca aparece un número que no venga del warehouse.

@@ -3,9 +3,10 @@
 <p align="center"><i>Todas las métricas del programa en un enlace, sin servidor y sin dependencias</i></p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-26%20passed-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-55%20passed-brightgreen">
   <img alt="deploy" src="https://img.shields.io/badge/deploy-Vercel-black">
   <img alt="dependencias" src="https://img.shields.io/badge/dependencias-0-success">
+  <img alt="asistente" src="https://img.shields.io/badge/asistente-determinista-8A63D2">
   <img alt="licencia" src="https://img.shields.io/badge/licencia-MIT-blue">
 </p>
 
@@ -42,6 +43,48 @@ Los números del programa vivían repartidos entre el CRM, Mailchimp, las redes,
 5. **Accesible de verdad**: paleta validada para daltonismo, modo claro y oscuro, y una vista de tablas para que nada dependa solo del color.
 
 ---
+
+## El tablero responde, no solo informa
+
+Tres controles arriba y un asistente debajo de los indicadores:
+
+- **Período (30 / 60 / 90 días).** No es un zoom en el navegador: cada ventana
+  se calcula en Python contra el warehouse, con su propio período anterior para
+  la comparación. Por eso el warehouse guarda 180 días — la ventana de 90
+  necesita otros 90 detrás con que compararse.
+- **Canales.** Apaga los que no interesan y los gráficos por canal, las tablas
+  y el asistente se recalculan juntos.
+- **Asistente de análisis.** Cuatro preguntas frecuentes; responde leyendo el
+  período activo.
+
+### Qué es exactamente el asistente
+
+Un motor de reglas escritas a mano sobre los datos del período. Es
+**determinista**: los mismos datos dan siempre el mismo texto. No llama a
+ninguna API, así que el tablero desplegado no necesita credenciales, no tiene
+coste por consulta y no puede inventarse una cifra.
+
+Eso último importa más de lo que parece. Un modelo de lenguaje suelto sobre un
+tablero de KPIs puede redactar mejor, pero también puede afirmar algo que los
+datos no dicen; y aquí las afirmaciones mueven presupuesto. Las reglas son
+auditables, y hay 15 tests que fijan datos conocidos y comprueban que las
+conclusiones sean las correctas.
+
+Conectarlo a un modelo real es sustituir una función — `responder()` — sin
+tocar el resto del tablero. Está explicado en
+[`METRICAS.md`](METRICAS.md) § Asistente.
+
+### Qué encuentra
+
+Con los datos de demostración, en la ventana de 30 días:
+
+| Nivel | Hallazgo |
+| --- | --- |
+| Decidir | Web trae el 29 % de los leads y es el 4.º de 5 en conversión |
+| Decidir | Las últimas 3 campañas de email abren al 24.7 % contra un 30.5 % del período |
+| Vigilar | Podium convierte al 50 % y solo aporta el 16 % del volumen |
+| Vigilar | 4 de cada 10 inscritos no llega al taller |
+| Sostener | El alcance en redes sube un 44.6 % |
 
 ## Cómo funciona
 

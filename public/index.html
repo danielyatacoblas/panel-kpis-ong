@@ -51,11 +51,89 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:16p
 h1{font-size:19px;font-weight:700;letter-spacing:-.02em}
 .sub{font-size:12.5px;color:var(--text-2);margin-top:1px}
 .hdr-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn{font:600 12.5px inherit;padding:8px 13px;border-radius:9px;border:1px solid var(--border);
+/* font-family aparte: el atajo `font:` no admite `inherit` como familia y el
+   navegador descartaba la regla entera, dejando los botones en la fuente del
+   sistema en vez de la del tablero. */
+.btn{font-weight:600;font-size:12.5px;font-family:inherit;
+     padding:8px 13px;border-radius:9px;border:1px solid var(--border);
      background:var(--surface-1);color:var(--text-2);cursor:pointer;transition:.15s}
 .btn:hover{color:var(--text-1);border-color:var(--axis)}
 .btn[aria-pressed="true"]{background:var(--s1);border-color:var(--s1);color:#fff}
 .stamp{font-size:11.5px;color:var(--muted);padding:8px 0}
+
+/* ── Barra de filtros ───────────────────────────────────────────────────
+   Los controles van en una sola fila sobre los gráficos, no repartidos por
+   el tablero: quien filtra quiere ver el efecto en todo a la vez.          */
+.filtros{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+         background:var(--surface-1);border:1px solid var(--border);
+         border-radius:var(--radius);padding:12px 16px;margin-bottom:14px}
+.f-grupo{display:flex;align-items:center;gap:9px;min-width:0}
+.f-lbl{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;
+       letter-spacing:.05em;white-space:nowrap}
+.seg{display:flex;background:var(--plane);border:1px solid var(--border);
+     border-radius:9px;padding:2px;gap:2px}
+.seg button{font-weight:600;font-size:12.5px;font-family:inherit;border:0;
+            background:transparent;color:var(--text-2);padding:6px 13px;
+            border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap}
+.seg button:hover{color:var(--text-1)}
+.seg button[aria-pressed="true"]{background:var(--s1);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-weight:600;font-size:12px;font-family:inherit;padding:5px 11px 5px 8px;
+      border-radius:20px;border:1px solid var(--border);background:var(--plane);
+      color:var(--text-2);cursor:pointer;transition:.15s;
+      display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--axis);color:var(--text-1)}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--punto);flex-shrink:0;
+        transition:.15s}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip[aria-pressed="false"] i{background:var(--axis)}
+.f-reset{margin-left:auto;font-size:12px;color:var(--muted);background:none;border:0;
+         font-family:inherit;cursor:pointer;text-decoration:underline;padding:6px 0}
+.f-reset:hover{color:var(--text-1)}
+.f-reset[hidden]{display:none}
+
+/* ── Asistente ──────────────────────────────────────────────────────────── */
+.asis{background:var(--surface-1);border:1px solid var(--border);
+      border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.asis-cab{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+.asis-marca{width:32px;height:32px;border-radius:9px;background:var(--s1);color:#fff;
+            display:grid;place-items:center;font-weight:800;font-size:11px;
+            letter-spacing:-.02em;flex-shrink:0}
+.asis-tit{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+.asis-sub{font-size:11.5px;color:var(--muted)}
+.asis-preg{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0 4px}
+.preg{font-weight:600;font-size:12px;font-family:inherit;padding:7px 12px;
+      border-radius:20px;border:1px solid var(--border);background:var(--plane);
+      color:var(--text-2);cursor:pointer;transition:.15s;text-align:left}
+.preg:hover{border-color:var(--s1);color:var(--s1)}
+.preg[aria-pressed="true"]{background:var(--s1);border-color:var(--s1);color:#fff}
+.asis-cuerpo{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
+.asis-resp{font-size:13.5px;color:var(--text-1);line-height:1.65;min-height:1.65em}
+.asis-resp b{font-weight:700}
+.cursor{display:inline-block;width:2px;height:1em;background:var(--s1);
+        vertical-align:-.14em;margin-left:1px}
+@media (prefers-reduced-motion: no-preference){
+  .cursor{animation:parpadeo 1s steps(2,start) infinite}
+}
+@keyframes parpadeo{to{visibility:hidden}}
+.hallazgos{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.hz{display:flex;gap:11px;padding:11px 13px;border-radius:10px;background:var(--plane);
+    border:1px solid var(--border);align-items:flex-start}
+.hz-marca{width:7px;align-self:stretch;border-radius:4px;flex-shrink:0;background:var(--muted)}
+.hz.critico .hz-marca{background:var(--crit)}
+.hz.aviso   .hz-marca{background:var(--warn)}
+.hz.bueno   .hz-marca{background:var(--good)}
+.hz-txt{min-width:0}
+.hz-tit{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px;
+        flex-wrap:wrap}
+.hz-nivel{font-weight:800;font-size:9.5px;font-family:inherit;letter-spacing:.06em;
+          text-transform:uppercase;padding:2px 7px;border-radius:20px;
+          background:var(--surface-1);border:1px solid var(--border);color:var(--text-2)}
+.hz-det{font-size:12px;color:var(--text-2);margin-top:3px}
+.asis-pie{font-size:11px;color:var(--muted);margin-top:13px;line-height:1.55}
+@media (prefers-reduced-motion: no-preference){
+  .hz{animation:subir .45s ease-out both;animation-delay:var(--retraso,0s)}
+}
 
 /* ── Hero ───────────────────────────────────────────────────────────────── */
 .hero{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);
@@ -99,8 +177,15 @@ h2{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
   .anim-linea{stroke-dasharray:var(--largo);
               animation:trazar 1.1s cubic-bezier(.4,0,.2,1) both;
               animation-delay:var(--retraso,0s)}
-  .anim-area{animation:aparecer .8s ease-out both;
-             animation-delay:calc(var(--retraso,0s) + .35s)}
+  /* El área es el único caso donde no se puede usar `aparecer` ni `both`:
+     - `aparecer` termina en opacity:1 y pisaría el atributo opacity=".10" del
+       <path> (CSS gana a los atributos de presentación), dejando el área azul
+       sólida y tapando la línea del dato diario;
+     - `both` + retardo fuerza el fotograma inicial (opacity:0) mientras dura la
+       espera, así que si la animación nunca corre el área se queda invisible.
+     Sin fill-mode y sin retardo, el reposo es siempre el .10 del atributo y la
+     animación solo añade la entrada. */
+  .anim-area{animation:aparecerArea .8s ease-out}
   .anim-punto{animation:aparecer .4s ease-out both;
               animation-delay:calc(var(--retraso,0s) + 1s)}
   .anim-barra{transform-origin:var(--origen,left center);
@@ -116,6 +201,8 @@ h2{font-size:14.5px;font-weight:700;letter-spacing:-.01em}
 }
 @keyframes trazar{from{stroke-dashoffset:var(--largo)} to{stroke-dashoffset:0}}
 @keyframes aparecer{from{opacity:0} to{opacity:1}}
+/* .10 es el mismo valor que el atributo del <path>: si uno cambia, cambia el otro. */
+@keyframes aparecerArea{from{opacity:0} to{opacity:.10}}
 @keyframes crecerX{from{transform:scaleX(0)} to{transform:scaleX(1)}}
 @keyframes crecerY{from{transform:scaleY(0)} to{transform:scaleY(1)}}
 @keyframes subir{from{opacity:0;transform:translateY(10px)}
@@ -175,19 +262,50 @@ footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);
     </div>
   </header>
 
+  <!-- FILTROS: período y canales. Afectan a todo el tablero a la vez. -->
+  <section class="filtros" aria-label="Filtros del tablero">
+    <div class="f-grupo">
+      <span class="f-lbl" id="lblPeriodo">Período</span>
+      <div class="seg" id="segPeriodo" role="group" aria-labelledby="lblPeriodo"></div>
+    </div>
+    <div class="f-grupo">
+      <span class="f-lbl" id="lblCanal">Canales</span>
+      <div class="chips" id="chipsCanal" role="group" aria-labelledby="lblCanal"></div>
+    </div>
+    <button class="f-reset" id="btnReset" hidden>Quitar filtros</button>
+  </section>
+
   <!-- HERO: el número que lidera el tablero -->
   <section class="hero" aria-labelledby="heroLbl">
     <div>
       <div class="hero-lbl" id="heroLbl">Leads generados · últimos 30 días</div>
       <div class="hero-val" id="heroVal">—</div>
       <div class="hero-note"><span id="heroDelta" class="delta flat">—</span>
-        <span> frente a los 30 días anteriores</span></div>
+        <span id="heroCmp"> frente a los 30 días anteriores</span></div>
     </div>
     <div class="hero-spark chart" id="heroSpark"></div>
   </section>
 
   <!-- KPI ROW -->
   <section class="kpis" id="kpis" aria-label="Indicadores del período"></section>
+
+  <!-- ASISTENTE: lee los datos del período activo y saca los hallazgos -->
+  <section class="asis" aria-labelledby="asisTit">
+    <div class="asis-cab">
+      <div class="asis-marca">IA</div>
+      <div>
+        <div class="asis-tit" id="asisTit">Asistente de análisis</div>
+        <div class="asis-sub" id="asisSub">Lee el período activo y dice qué mirar</div>
+      </div>
+    </div>
+    <div class="asis-preg" id="asisPreg" role="group"
+         aria-label="Preguntas sugeridas"></div>
+    <div class="asis-cuerpo">
+      <p class="asis-resp" id="asisResp" aria-live="polite"></p>
+      <ul class="hallazgos" id="asisHall"></ul>
+    </div>
+    <p class="asis-pie" id="asisPie"></p>
+  </section>
 
   <!-- LEADS -->
   <section class="card">
@@ -624,6 +742,90 @@ function sparkline(cont, datos) {
    Carga de datos y render
    ════════════════════════════════════════════════════════════════════════ */
 let DATOS = null;
+
+/* ════════════════════════════════════════════════════════════════════════
+   Estado de los filtros. `ventana` indexa datos ya calculados en Python
+   (30/60/90 días con su propio período de comparación); `canales` es un
+   subconjunto que solo afecta a los dos gráficos por canal y al asistente.
+   ════════════════════════════════════════════════════════════════════════ */
+const ESTADO = {ventana: '30', canales: null, pregunta: 'resumen'};
+
+/* Vista activa: los KPIs y desgloses de la ventana elegida. Si la ventana no
+   existe en el JSON (datos generados por una versión anterior del script), se
+   cae con elegancia a los valores de primer nivel. */
+function vista() {
+  const v = DATOS.ventanas && DATOS.ventanas[ESTADO.ventana];
+  return v ? v : {kpis: DATOS.kpis, desgloses: DATOS.desgloses};
+}
+
+const CANALES_ORDEN = ['web', 'facebook', 'instagram', 'podium', 'referido'];
+const titulo = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function canalesActivos() {
+  const todos = Object.keys(vista().desgloses.leads_por_canal);
+  if (!ESTADO.canales) return todos;
+  const sel = todos.filter(c => ESTADO.canales.has(c));
+  return sel.length ? sel : todos;   // nunca dejar el tablero sin datos
+}
+const hayFiltro = () => ESTADO.ventana !== '30' || ESTADO.canales !== null;
+
+/* ── Construcción de los controles ─────────────────────────────────────── */
+function montarFiltros() {
+  const ventanas = (DATOS.periodo.ventanas || [30]).map(String);
+  const seg = document.getElementById('segPeriodo');
+  seg.innerHTML = ventanas.map(v =>
+    `<button type="button" data-v="${v}" aria-pressed="${v === ESTADO.ventana}"
+     >${v} días</button>`).join('');
+  seg.onclick = (e) => {
+    const b = e.target.closest('button[data-v]');
+    if (!b || b.dataset.v === ESTADO.ventana) return;
+    ESTADO.ventana = b.dataset.v;
+    seg.querySelectorAll('button').forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.v === ESTADO.ventana));
+    refrescar();
+  };
+
+  const canales = Object.keys(vista().desgloses.leads_por_canal)
+    .sort((a, b) => CANALES_ORDEN.indexOf(a) - CANALES_ORDEN.indexOf(b));
+  const cont = document.getElementById('chipsCanal');
+  cont.innerHTML = canales.map(c =>
+    `<button type="button" class="chip" data-c="${c}" aria-pressed="true"
+      style="--punto:${css(colorDe(c))}"><i></i>${titulo(c)}</button>`).join('');
+  cont.onclick = (e) => {
+    const b = e.target.closest('button[data-c]');
+    if (!b) return;
+    if (!ESTADO.canales) ESTADO.canales = new Set(canales);
+    const c = b.dataset.c;
+    ESTADO.canales.has(c) ? ESTADO.canales.delete(c) : ESTADO.canales.add(c);
+    // Deseleccionarlo todo equivale a no filtrar: un tablero vacío no informa.
+    if (!ESTADO.canales.size || ESTADO.canales.size === canales.length)
+      ESTADO.canales = ESTADO.canales.size ? null : null;
+    sincronizarChips();
+    refrescar();
+  };
+  sincronizarChips();
+  document.getElementById('btnReset').onclick = () => {
+    ESTADO.ventana = '30'; ESTADO.canales = null;
+    seg.querySelectorAll('button').forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.v === '30'));
+    sincronizarChips();
+    refrescar();
+  };
+}
+
+function sincronizarChips() {
+  const act = ESTADO.canales;
+  document.querySelectorAll('#chipsCanal .chip').forEach(b =>
+    b.setAttribute('aria-pressed', act ? String(act.has(b.dataset.c)) : 'true'));
+  document.getElementById('btnReset').hidden = !hayFiltro();
+}
+
+/* Cambiar de filtro vuelve a animar: el movimiento es lo que comunica que el
+   tablero respondió. Sin esto los números cambian de golpe y no se nota. */
+function refrescar() {
+  animar = true;
+  render();
+}
 // los colores de las redes salen del mapa por entidad (colorDe)
 const REDES_NOMBRE = {instagram: 'Instagram', facebook: 'Facebook',
                       linkedin: 'LinkedIn', tiktok: 'TikTok'};
@@ -636,15 +838,42 @@ function contarHasta(nodo, valor, decimales = 0) {
   nodo.textContent = fmt(valor, decimales);
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!animar || quieto) return;
-  const dur = 900, t0 = performance.now();
-  const paso = (ahora) => {
-    const p = Math.min(1, (ahora - t0) / dur);
+
+  // Cancelar la cuenta anterior: al cambiar de filtro dos cuentas escribirían
+  // sobre el mismo nodo y el número acabaría en cualquier parte.
+  detenerCuenta(nodo);
+
+  /* El progreso se cuenta por fotogramas, no restando marcas de tiempo.
+     Restar relojes parece más preciso pero es frágil: la marca del primer
+     requestAnimationFrame puede venir de un fotograma ya encolado y quedar
+     ANTES del instante de arranque, y entonces el progreso sale negativo y la
+     curva de suavizado escupe un número absurdo. Contando fotogramas el
+     progreso solo puede ir de 0 a 1.
+
+     Y por si el navegador deja de emitir fotogramas (pestaña en segundo plano,
+     motor de captura), un temporizador de seguridad escribe el valor final:
+     pase lo que pase, el número que queda en pantalla es el correcto. */
+  const FOTOGRAMAS = 48;            // ~800 ms a 60 fps
+  let f = 0;
+  const paso = () => {
+    f++;
+    const p = Math.min(1, f / FOTOGRAMAS);
     const suave = 1 - Math.pow(1 - p, 3);          // desacelera al final
     nodo.textContent = fmt(valor * suave, decimales);
-    if (p < 1) requestAnimationFrame(paso);
-    else nodo.textContent = fmt(valor, decimales);
+    if (p < 1) nodo._cuenta = requestAnimationFrame(paso);
+    else detenerCuenta(nodo, valor, decimales);
   };
-  requestAnimationFrame(paso);
+  nodo._cuenta = requestAnimationFrame(paso);
+  nodo._red = setTimeout(() => detenerCuenta(nodo, valor, decimales), 1400);
+}
+
+/* Corta cualquier animación en curso sobre el nodo y, si se le pasa un valor,
+   deja escrito el definitivo. */
+function detenerCuenta(nodo, valor, decimales) {
+  if (nodo._cuenta) cancelAnimationFrame(nodo._cuenta);
+  if (nodo._red) clearTimeout(nodo._red);
+  nodo._cuenta = null; nodo._red = null;
+  if (valor !== undefined) nodo.textContent = fmt(valor, decimales);
 }
 
 function deltaHTML(v, mejor) {
@@ -654,23 +883,249 @@ function deltaHTML(v, mejor) {
   return `<span class="delta ${bueno ? 'pos' : 'neg'}">${flecha} ${Math.abs(v).toFixed(1)} %</span>`;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   Asistente de análisis
+
+   Cómo funciona, sin misterio: lee los datos del período activo y aplica un
+   conjunto de reglas escritas a mano. Es determinista — los mismos datos dan
+   siempre el mismo texto — y no llama a ninguna API, así que el tablero sigue
+   funcionando desplegado sin credenciales y sin coste por consulta.
+
+   Para enchufarlo a un modelo real basta sustituir `responder()` por una
+   llamada a la API: el resto del tablero no se entera. Está documentado en
+   METRICAS.md § Asistente.
+   ════════════════════════════════════════════════════════════════════════ */
+const PREGUNTAS = [
+  {id: 'resumen',  txt: 'Resumen para la junta'},
+  {id: 'invertir', txt: '¿Dónde invierto el próximo sol?'},
+  {id: 'empeoro',  txt: '¿Qué empeoró este período?'},
+  {id: 'mejoro',   txt: '¿Qué está funcionando?'},
+];
+
+const pct = (v, d = 1) => `${fmt(v, d)} %`;
+
+/* Todos los hallazgos que las reglas encuentran, ordenados por gravedad. */
+function hallazgos() {
+  const v = vista(), out = [];
+  const kpi = (id) => v.kpis.find(k => k.id === id) || {valor: 0, variacion: 0};
+  const act = canalesActivos();
+  const vol = act.map(c => [c, v.desgloses.leads_por_canal[c] ?? 0]);
+  const cnv = act.map(c => [c, v.desgloses.conversion_por_canal[c] ?? 0]);
+  const totalVol = vol.reduce((a, [, n]) => a + n, 0);
+  const porVol = [...vol].sort((a, b) => b[1] - a[1]);
+  const porCnv = [...cnv].sort((a, b) => b[1] - a[1]);
+  const cnvDe = Object.fromEntries(cnv);
+  const medianaCnv = [...cnv].map(x => x[1]).sort((a, b) => a - b)[Math.floor(cnv.length / 2)] || 0;
+
+  // 1. El canal que más trae, ¿convierte bien? Es la pregunta que decide gasto.
+  if (porVol.length >= 2) {
+    const [lider, nLider] = porVol[0];
+    const puesto = porCnv.findIndex(([c]) => c === lider) + 1;
+    if (cnvDe[lider] < medianaCnv) {
+      out.push({nivel: 'critico', titulo: `${titulo(lider)} trae el volumen pero no convierte`,
+        detalle: `Es el canal con más leads (${fmt(nLider)}, ${pct(totalVol ? nLider / totalVol * 100 : 0, 0)} del total) `
+               + `y a la vez el número ${puesto} de ${porCnv.length} en conversión, con ${pct(cnvDe[lider])}. `
+               + `Cada lead suyo cuesta lo mismo de atender y rinde menos.`});
+    } else {
+      out.push({nivel: 'bueno', titulo: `${titulo(lider)} lidera volumen y convierte por encima de la mediana`,
+        detalle: `${fmt(nLider)} leads con ${pct(cnvDe[lider])} de conversión, sobre una mediana de ${pct(medianaCnv)}. `
+               + `Es el canal que conviene sostener.`});
+    }
+  }
+
+  // 2. Conversión alta con poco volumen = margen de crecimiento barato.
+  if (porCnv.length >= 2) {
+    const [mejor, cMejor] = porCnv[0];
+    const volMejor = Object.fromEntries(vol)[mejor] ?? 0;
+    const share = totalVol ? volMejor / totalVol * 100 : 0;
+    if (share < 25) {
+      out.push({nivel: 'aviso', titulo: `${titulo(mejor)} es el que mejor convierte y apenas se usa`,
+        detalle: `Convierte al ${pct(cMejor)} pero solo aporta ${fmt(volMejor)} leads (${pct(share, 0)} del total). `
+               + `Subirlo al ${pct(share * 2, 0)} del mix daría unos `
+               + `${fmt(Math.round(volMejor * cMejor / 100))} inscritos más sin tocar el resto.`});
+    }
+  }
+
+  // 3. Email: caída sostenida de apertura.
+  const camp = DATOS.series.apertura_campana || [];
+  if (camp.length >= 4) {
+    const prom = camp.reduce((a, c) => a + c.valor, 0) / camp.length;
+    const ult3 = camp.slice(-3);
+    const pUlt = ult3.reduce((a, c) => a + c.valor, 0) / ult3.length;
+    if (pUlt < prom * 0.9) {
+      out.push({nivel: 'critico', titulo: 'La apertura de email viene cayendo',
+        detalle: `Las últimas ${ult3.length} campañas promedian ${pct(pUlt)} frente al ${pct(prom)} del período `
+               + `(${pct((pUlt / prom - 1) * 100)} relativo). Revisa asuntos, horario de envío y limpieza de lista `
+               + `antes de que arrastre a los clics.`});
+    }
+  }
+
+  // 4 y 5. El KPI que más empeoró y el que más mejoró.
+  const conVar = v.kpis.filter(k => Number.isFinite(k.variacion) && k.variacion !== 0);
+  const signo = (k) => k.mejor === 'abajo' ? -k.variacion : k.variacion;
+  const peor = conVar.slice().sort((a, b) => signo(a) - signo(b))[0];
+  const mejor = conVar.slice().sort((a, b) => signo(b) - signo(a))[0];
+  if (peor && signo(peor) < 0) {
+    out.push({nivel: signo(peor) < -10 ? 'critico' : 'aviso',
+      titulo: `${peor.etiqueta} es lo que más retrocedió`,
+      detalle: `${pct(peor.variacion)} frente al período anterior, hasta `
+             + `${fmt(peor.valor, peor.unidad === '%' ? 1 : 0)}${peor.unidad === '%' ? ' %' : (peor.unidad || '')}. `
+             + `Es el número que hay que explicar en la reunión.`});
+  }
+  if (mejor && signo(mejor) > 0) {
+    out.push({nivel: 'bueno', titulo: `${mejor.etiqueta} es la mejor noticia`,
+      detalle: `${pct(mejor.variacion)} frente al período anterior. `
+             + `Vale la pena mirar qué se hizo distinto y repetirlo.`});
+  }
+
+  // 6. Asistencia: mide calidad del programa, no solo captación.
+  const asis = kpi('asistencia');
+  if (asis.valor && asis.valor < 75) {
+    // La proporción sale del dato: si el número cambia, el titular cambia con él.
+    const faltan = Math.max(1, Math.round((100 - asis.valor) / 10));
+    out.push({nivel: 'aviso', titulo: `${faltan} de cada 10 inscritos no llega al taller`,
+      detalle: `La asistencia real es del ${pct(asis.valor)}. Inscribir más gente no arregla esto: `
+             + `un recordatorio 24 h antes suele recuperar buena parte.`});
+  }
+
+  const orden = {critico: 0, aviso: 1, bueno: 2};
+  return out.sort((a, b) => orden[a.nivel] - orden[b.nivel]);
+}
+
+/* Cada pregunta elige qué hallazgos enseñar y con qué frase abrir. */
+function responder(pregunta) {
+  const v = vista(), h = hallazgos();
+  const leads = v.kpis.find(k => k.id === 'leads') || {valor: 0, variacion: 0};
+  const dias = ESTADO.ventana;
+  const filtro = ESTADO.canales
+    ? ` (mirando solo ${canalesActivos().map(titulo).join(', ')})` : '';
+
+  if (pregunta === 'invertir') {
+    const sel = h.filter(x => /convierte|volumen|usa/i.test(x.titulo));
+    return {texto:
+      `En estos ${dias} días entraron <b>${fmt(leads.valor)} leads</b>${filtro}. `
+      + (sel.length
+        ? `El dinero no debería repartirse por volumen sino por conversión: hay canales que traen mucho y cierran poco, y al revés.`
+        : `Los canales están parejos en conversión, así que aquí manda el volumen: sostén los que ya funcionan.`),
+      lista: sel.length ? sel : h.slice(0, 2)};
+  }
+  if (pregunta === 'empeoro') {
+    const sel = h.filter(x => x.nivel !== 'bueno');
+    return {texto: sel.length
+      ? `Hay <b>${sel.length} ${sel.length === 1 ? 'punto' : 'puntos'}</b> que vigilar en los últimos ${dias} días${filtro}. Van del más urgente al menos:`
+      : `Ningún indicador retrocedió de forma significativa en los últimos ${dias} días${filtro}.`,
+      lista: sel};
+  }
+  if (pregunta === 'mejoro') {
+    const sel = h.filter(x => x.nivel === 'bueno');
+    return {texto: sel.length
+      ? `Esto es lo que está saliendo bien en los últimos ${dias} días${filtro}:`
+      : `En los últimos ${dias} días${filtro} no hay ningún indicador claramente al alza. Conviene mirar la ventana de 90 días antes de concluir nada.`,
+      lista: sel};
+  }
+  // resumen
+  const criticos = h.filter(x => x.nivel === 'critico').length;
+  return {texto:
+    `En los últimos ${dias} días${filtro} entraron <b>${fmt(leads.valor)} leads</b>, `
+    + `un <b>${pct(leads.variacion)}</b> frente al período anterior. `
+    + (criticos
+      ? `Hay ${criticos} ${criticos === 1 ? 'asunto' : 'asuntos'} que pedirían decisión esta semana:`
+      : `Nada pide una decisión urgente; estos son los movimientos del período:`),
+    lista: h};
+}
+
+/* Escritura progresiva. No es adorno: da tiempo a leer y marca que el texto
+   se acaba de recalcular con los filtros nuevos. Se salta entera si el
+   sistema pide movimiento reducido. */
+let _tecleo = null;
+function teclear(nodo, html, alTerminar) {
+  clearInterval(_tecleo);
+  const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducido || !animar) { nodo.innerHTML = html; alTerminar && alTerminar(); return; }
+
+  // Se avanza sobre el texto visible, saltando las etiquetas de una vez para
+  // no mostrar nunca HTML a medio cerrar.
+  const pasos = [];
+  let i = 0;
+  while (i < html.length) {
+    if (html[i] === '<') { const f = html.indexOf('>', i); i = (f === -1 ? html.length : f + 1); }
+    else i++;
+    pasos.push(html.slice(0, i));
+  }
+  let n = 0;
+  nodo.innerHTML = '';
+  _tecleo = setInterval(() => {
+    n += 3;
+    if (n >= pasos.length) {
+      clearInterval(_tecleo);
+      nodo.innerHTML = html;
+      alTerminar && alTerminar();
+      return;
+    }
+    nodo.innerHTML = pasos[n] + '<span class="cursor"></span>';
+  }, 16);
+}
+
+function pintarAsistente() {
+  const cont = document.getElementById('asisPreg');
+  if (!cont.children.length) {
+    cont.innerHTML = PREGUNTAS.map(p =>
+      `<button type="button" class="preg" data-p="${p.id}"
+        aria-pressed="${p.id === ESTADO.pregunta}">${p.txt}</button>`).join('');
+    cont.onclick = (e) => {
+      const b = e.target.closest('button[data-p]');
+      if (!b) return;
+      ESTADO.pregunta = b.dataset.p;
+      cont.querySelectorAll('button').forEach(x =>
+        x.setAttribute('aria-pressed', String(x.dataset.p === ESTADO.pregunta)));
+      animar = true;
+      pintarAsistente();
+    };
+  }
+  cont.querySelectorAll('button').forEach(x =>
+    x.setAttribute('aria-pressed', String(x.dataset.p === ESTADO.pregunta)));
+
+  const {texto, lista} = responder(ESTADO.pregunta);
+  const ul = document.getElementById('asisHall');
+  ul.innerHTML = '';
+  teclear(document.getElementById('asisResp'), texto, () => {
+    ul.innerHTML = lista.map((x, i) => `<li class="hz ${x.nivel}" style="--retraso:${i * 0.07}s">
+      <span class="hz-marca"></span>
+      <span class="hz-txt">
+        <span class="hz-tit">${x.titulo}
+          <span class="hz-nivel">${x.nivel === 'critico' ? 'decidir' : x.nivel === 'aviso' ? 'vigilar' : 'sostener'}</span>
+        </span>
+        <span class="hz-det">${x.detalle}</span>
+      </span></li>`).join('');
+  });
+
+  document.getElementById('asisSub').textContent =
+    `${lista.length} ${lista.length === 1 ? 'hallazgo' : 'hallazgos'} en la ventana de ${ESTADO.ventana} días`;
+  document.getElementById('asisPie').innerHTML =
+    'Análisis determinista: reglas escritas sobre los datos del período, sin llamadas a ninguna API. '
+    + 'Los mismos datos dan siempre el mismo texto, y por eso es auditable. '
+    + 'Cambiar la fuente por un modelo de lenguaje es sustituir una función.';
+}
+
 function render() {
-  const d = DATOS;
+  const d = DATOS, V = vista(), dias = +ESTADO.ventana;
   document.getElementById('subtitulo').textContent =
-    `Últimos ${d.periodo.dias_kpi} días · ${d.periodo.desde} al ${d.periodo.hasta}`;
+    `Últimos ${dias} días · hasta ${d.periodo.hasta}`;
   document.getElementById('stamp').textContent = `actualizado ${d.generado_en}`;
   document.getElementById('fuentes').textContent =
     'Fuentes: ' + d.fuentes.map(f => f.nombre).join(' · ');
 
   // ── hero ──
-  const hero = d.kpis.find(k => k.id === 'leads');
+  const hero = V.kpis.find(k => k.id === 'leads');
+  document.getElementById('heroLbl').textContent = `Leads generados · últimos ${dias} días`;
+  document.getElementById('heroCmp').textContent = ` frente a los ${dias} días anteriores`;
   contarHasta(document.getElementById('heroVal'), hero.valor);
   document.getElementById('heroDelta').outerHTML =
     deltaHTML(hero.variacion, hero.mejor).replace('class="delta', 'id="heroDelta" class="delta');
   sparkline(document.getElementById('heroSpark'), d.series.leads_dia_suavizado.slice(-30));
 
   // ── tiles ──
-  const tiles = d.kpis.filter(k => k.id !== 'leads');
+  const tiles = V.kpis.filter(k => k.id !== 'leads');
   document.getElementById('kpis').innerHTML = tiles.map((k, i) => {
     const dec = k.unidad === '%' ? 1 : (k.unidad.includes('día') ? 2 : 0);
     return `<div class="tile${animar ? ' anim-entra' : ''}" style="--retraso:${i * 0.05}s">
@@ -686,17 +1141,20 @@ function render() {
     suave: d.series.leads_dia, area: true, etiquetasDirectas: false, alto: 250,
   });
 
-  // ── canales (volumen) ──
-  const canales = Object.entries(d.desgloses.leads_por_canal)
-    .map(([k, v]) => ({nombre: k.charAt(0).toUpperCase() + k.slice(1), valor: v,
+  // ── canales (volumen) ── solo los seleccionados en la barra de filtros
+  const sel = new Set(canalesActivos());
+  const canales = Object.entries(V.desgloses.leads_por_canal)
+    .filter(([k]) => sel.has(k))
+    .map(([k, v]) => ({nombre: titulo(k), valor: v,
                        etiqueta: 'Leads', color: colorDe(k),
-                       extra: {k: 'Conversión', v: (d.desgloses.conversion_por_canal[k] ?? 0).toFixed(1) + ' %'}}));
+                       extra: {k: 'Conversión', v: (V.desgloses.conversion_por_canal[k] ?? 0).toFixed(1) + ' %'}}));
   barChart(document.getElementById('chCanales'), {datos: canales});
 
   // ── conversión por canal ──
-  const conv = Object.entries(d.desgloses.conversion_por_canal)
+  const conv = Object.entries(V.desgloses.conversion_por_canal)
+    .filter(([k]) => sel.has(k))
     .sort((a, b) => b[1] - a[1])
-    .map(([k, v]) => ({nombre: k.charAt(0).toUpperCase() + k.slice(1), valor: v,
+    .map(([k, v]) => ({nombre: titulo(k), valor: v,
                        etiqueta: 'Conversión', color: colorDe(k)}));
   barChart(document.getElementById('chConversion'), {datos: conv, sufijo: ' %', decimales: 1});
 
@@ -722,12 +1180,13 @@ function render() {
   }
 
   // ── talleres ──
-  const tall = Object.entries(d.desgloses.asistencia_por_taller)
+  const tall = Object.entries(V.desgloses.asistencia_por_taller)
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => ({nombre: k, valor: v, etiqueta: 'Asistencia', color: colorDe(k)}));
   barChart(document.getElementById('chTalleres'), {datos: tall, sufijo: ' %', decimales: 1});
 
   construirTablas();
+  pintarAsistente();
   animar = false;   // solo la primera vez; en resize o cambio de tema, no
 }
 
@@ -739,23 +1198,26 @@ function tabla(cabeceras, filas) {
       `<td${i ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 function construirTablas() {
-  const d = DATOS, q = (s) => document.querySelector(`[data-tabla="${s}"]`);
+  const d = DATOS, V = vista(), q = (s) => document.querySelector(`[data-tabla="${s}"]`);
+  const sel = new Set(canalesActivos());
   q('leads').innerHTML = tabla(['Fecha', 'Leads', 'Media 7d'],
     d.series.leads_dia.map((p, i) => [fechaCorta(p.fecha), fmt(p.valor),
       fmt(d.series.leads_dia_suavizado[i].valor, 1)]).slice(-30));
   q('canales').innerHTML = tabla(['Canal', 'Leads', 'Conversión %'],
-    Object.entries(d.desgloses.leads_por_canal).map(([k, v]) =>
-      [k, fmt(v), fmt(d.desgloses.conversion_por_canal[k] ?? 0, 1)]));
+    Object.entries(V.desgloses.leads_por_canal).filter(([k]) => sel.has(k))
+      .map(([k, v]) => [titulo(k), fmt(v), fmt(V.desgloses.conversion_por_canal[k] ?? 0, 1)]));
   q('conversion').innerHTML = tabla(['Canal', 'Conversión %'],
-    Object.entries(d.desgloses.conversion_por_canal).map(([k, v]) => [k, fmt(v, 1)]));
-  q('redes').innerHTML = tabla(['Red', 'Alcance total (30d)'],
-    Object.entries(d.desgloses.alcance_por_red).map(([k, v]) =>
+    Object.entries(V.desgloses.conversion_por_canal).filter(([k]) => sel.has(k))
+      .sort((a, b) => b[1] - a[1]).map(([k, v]) => [titulo(k), fmt(v, 1)]));
+  q('redes').innerHTML = tabla([`Red`, `Alcance total (${ESTADO.ventana}d)`],
+    Object.entries(V.desgloses.alcance_por_red).map(([k, v]) =>
       [REDES_NOMBRE[k] || k, fmt(v)]));
   q('email').innerHTML = tabla(['Campaña', 'Fecha', 'Apertura %', 'Clics %'],
     d.series.apertura_campana.map(c => [c.campana, fechaCorta(c.fecha),
       fmt(c.valor, 1), fmt(c.clics, 1)]));
   q('talleres').innerHTML = tabla(['Taller', 'Asistencia %'],
-    Object.entries(d.desgloses.asistencia_por_taller).map(([k, v]) => [k, fmt(v, 1)]));
+    Object.entries(V.desgloses.asistencia_por_taller)
+      .sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, fmt(v, 1)]));
 }
 
 /* ── Controles ─────────────────────────────────────────────────────────── */
@@ -777,7 +1239,10 @@ const rotularTema = () =>
     enOscuro() ? 'Modo claro' : 'Modo oscuro';
 
 rotularTema();
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+// Encadenamiento opcional a propósito: esto corre en el nivel superior, así que
+// un navegador sin addEventListener en MediaQueryList (Safari antiguo) no
+// tumbaría solo el rótulo del botón, sino el tablero entero.
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
   if (!document.documentElement.getAttribute('data-theme')) rotularTema();
 });
 
@@ -808,7 +1273,7 @@ function cargarDatos() {
 }
 
 cargarDatos()
-  .then(j => { DATOS = j; render(); })
+  .then(j => { DATOS = j; montarFiltros(); render(); })
   .catch(err => {
     const local = location.protocol === 'file:';
     document.getElementById('subtitulo').textContent = local
