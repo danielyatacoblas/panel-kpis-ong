@@ -765,12 +765,25 @@ document.getElementById('btnTabla').addEventListener('click', (e) => {
   e.target.textContent = on ? 'Ver tablas' : 'Ocultar tablas';
   document.querySelectorAll('.tabla-wrap').forEach(t => t.classList.toggle('oculto', on));
 });
+/* El botón nombra la acción, no el estado: si ya estamos en oscuro, ofrece
+   pasar a claro. Sin esto el rótulo arrancaba siempre en "Modo oscuro" y
+   mentía a quien tuviera el sistema en tema oscuro. */
+const enOscuro = () => document.documentElement.getAttribute('data-theme') === 'dark'
+  || (!document.documentElement.getAttribute('data-theme')
+      && matchMedia('(prefers-color-scheme: dark)').matches);
+
+const rotularTema = () =>
+  document.getElementById('btnTema').textContent =
+    enOscuro() ? 'Modo claro' : 'Modo oscuro';
+
+rotularTema();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (!document.documentElement.getAttribute('data-theme')) rotularTema();
+});
+
 document.getElementById('btnTema').addEventListener('click', () => {
-  const oscuroAhora = document.documentElement.getAttribute('data-theme') === 'dark'
-    || (!document.documentElement.getAttribute('data-theme')
-        && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.setAttribute('data-theme', oscuroAhora ? 'light' : 'dark');
-  document.getElementById('btnTema').textContent = oscuroAhora ? 'Modo oscuro' : 'Modo claro';
+  document.documentElement.setAttribute('data-theme', enOscuro() ? 'light' : 'dark');
+  rotularTema();
   if (DATOS) render();     // los colores se releen del tema activo
 });
 addEventListener('resize', () => { clearTimeout(window._rz);
