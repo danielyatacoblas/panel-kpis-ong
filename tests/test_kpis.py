@@ -233,3 +233,64 @@ def test_datos_json_tiene_la_forma_que_espera_el_dashboard():
     # cada punto de serie tiene fecha y valor
     for p_ in d["series"]["leads_dia"][:5]:
         assert {"fecha", "valor"} <= set(p_)
+
+
+def _datos_json():
+    import json
+    p = ROOT / "public" / "datos.json"
+    if not p.exists():
+        pytest.skip("corre antes: python scripts/construir_dashboard.py")
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def test_el_json_trae_una_ventana_por_cada_periodo_del_selector():
+    """El selector de período no reescala nada en el navegador: cada ventana
+    viene con sus KPIs y desgloses ya calculados en Python."""
+    d = _datos_json()
+    declaradas = [str(v) for v in d["periodo"]["ventanas"]]
+    assert declaradas, "el tablero necesita al menos una ventana"
+    assert set(declaradas) == set(d["ventanas"]), (
+        "las ventanas declaradas y las presentes deben coincidir")
+
+    for nombre, v in d["ventanas"].items():
+        assert any(k["id"] == "leads" for k in v["kpis"]), f"ventana {nombre} sin KPI leads"
+        for g in ("leads_por_canal", "conversion_por_canal", "asistencia_por_taller"):
+            assert g in v["desgloses"], f"ventana {nombre} sin desglose {g}"
+
+
+def test_una_ventana_mas_larga_acumula_mas_leads():
+    """Comprobación de sentido: 90 días no pueden traer menos leads que 30.
+    Si esto falla, las ventanas se calcularon sobre el rango equivocado."""
+    d = _datos_json()
+    por_ventana = {
+        int(n): next(k["valor"] for k in v["kpis"] if k["id"] == "leads")
+        for n, v in d["ventanas"].items()
+    }
+    orden = sorted(por_ventana)
+    for corta, larga in zip(orden, orden[1:]):
+        assert por_ventana[larga] >= por_ventana[corta], (
+            f"{larga} días trae menos leads ({por_ventana[larga]}) "
+            f"que {corta} días ({por_ventana[corta]})")
+
+
+def test_toda_ventana_tiene_un_periodo_anterior_completo_con_que_compararse():
+    """La variación de cada KPI se calcula contra el período inmediatamente
+    anterior. Si el warehouse no llega tan atrás, la variación es un artefacto:
+    el tablero mostraría un salto enorme que solo refleja la falta de datos."""
+    import csv
+    from datetime import date
+
+    d = _datos_json()
+    mas_larga = max(int(v) for v in d["periodo"]["ventanas"])
+
+    fechas = []
+    for p in (ROOT / "warehouse").glob("*.csv"):
+        with p.open(encoding="utf-8") as f:
+            fechas += [date.fromisoformat(r["fecha"][:10]) for r in csv.DictReader(f)]
+    if not fechas:
+        pytest.skip("corre antes: python scripts/generar_warehouse.py")
+
+    historia = (max(fechas) - min(fechas)).days + 1
+    assert historia >= mas_larga * 2, (
+        f"el warehouse tiene {historia} días y la ventana mayor es de "
+        f"{mas_larga}: hacen falta {mas_larga * 2} para poder compararla")

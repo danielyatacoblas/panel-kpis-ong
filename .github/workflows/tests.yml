@@ -21,6 +21,10 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
@@ -60,6 +64,13 @@ jobs:
 
       - name: Correr los tests
         run: python -m pytest tests/ -v
+
+      # El dashboard es JavaScript: los KPIs se validan en Python, pero los
+      # gráficos y el motor del asistente solo se pueden probar aquí.
+      - name: Correr los tests de JavaScript
+        run: |
+          node tests/probar_graficos_vacios.mjs
+          node tests/probar_asistente.mjs
 
       # El dashboard es un archivo estático: si el JS no parsea, la página
       # queda en blanco y no lo notaríamos hasta desplegarla.

@@ -29,8 +29,11 @@ SALIDA = ROOT / "public" / "datos.json"
 RESPALDO = ROOT / "public" / "datos.js"      # copia embebida para abrir sin servidor
 
 FUENTES = ("leads", "email", "redes", "web", "educacion")
-DIAS_KPI = 30        # ventana de los KPIs
+DIAS_KPI = 30        # ventana por defecto de los KPIs
 DIAS_SERIE = 90      # ventana de los gráficos
+# El selector de período del tablero es real: cada ventana se calcula aquí
+# contra el warehouse, no se reescala en el navegador.
+VENTANAS = (30, 60, 90)
 
 
 def leer(nombre: str) -> list[dict]:
@@ -47,7 +50,8 @@ def main():
                 for fuente in datos.values() for f in fuente)
     desde = hasta - timedelta(days=DIAS_SERIE - 1)
 
-    res = kpis.resumen(datos, hasta, DIAS_KPI)
+    ventanas = {str(d): kpis.resumen(datos, hasta, d) for d in VENTANAS}
+    res = ventanas[str(DIAS_KPI)]
 
     leads_dia = kpis.serie_diaria(datos["leads"], None, desde, hasta)
     web_dia = kpis.serie_diaria(datos["web"], "sesiones", desde, hasta)
@@ -68,9 +72,14 @@ def main():
     salida = {
         "generado_en": date.today().isoformat(),
         "periodo": {"desde": desde.isoformat(), "hasta": hasta.isoformat(),
-                    "dias_kpi": DIAS_KPI, "dias_serie": DIAS_SERIE},
+                    "dias_kpi": DIAS_KPI, "dias_serie": DIAS_SERIE,
+                    "ventanas": list(VENTANAS)},
         "kpis": res["kpis"],
         "desgloses": res["desgloses"],
+        # Cada ventana con sus KPIs y desgloses ya calculados: el selector del
+        # tablero cambia de ventana sin recalcular nada a ojo en el navegador.
+        "ventanas": {d: {"kpis": v["kpis"], "desgloses": v["desgloses"]}
+                     for d, v in ventanas.items()},
         "series": {
             "leads_dia": leads_dia,
             "leads_dia_suavizado": kpis.media_movil(leads_dia, 7),
@@ -95,8 +104,10 @@ def main():
     }
 
     SALIDA.parent.mkdir(parents=True, exist_ok=True)
+    # newline explícito en ambas salidas: en Windows Python escribiría CRLF y
+    # los archivos no coincidirían con los que regenera el CI en Linux.
     SALIDA.write_text(json.dumps(salida, ensure_ascii=False, indent=1),
-                      encoding="utf-8")
+                      encoding="utf-8", newline="\n")
 
     # Copia embebida como respaldo: permite abrir el dashboard con doble clic.
     # Con el protocolo file:// el navegador bloquea fetch() por CORS, así que
@@ -106,7 +117,7 @@ def main():
         "// Respaldo para abrir el dashboard sin servidor (file://).\n"
         "window.DATOS_EMBEBIDOS = "
         + json.dumps(salida, ensure_ascii=False, separators=(",", ":"))
-        + ";\n", encoding="utf-8")
+        + ";\n", encoding="utf-8", newline="\n")
 
     kb = SALIDA.stat().st_size / 1024
     print(f"✓ {SALIDA.relative_to(ROOT)} ({kb:.0f} KB)")
