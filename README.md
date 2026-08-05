@@ -66,20 +66,11 @@ Las tres piezas que sostienen el diagrama:
 
 ## Demo en video
 
-<!-- ────────────────────────────────────────────────────────────────────
-     ESPACIO RESERVADO PARA EL REPRODUCTOR
+https://github.com/user-attachments/assets/59b7d3e3-a493-434c-9382-d4320f09ba09
 
-     El archivo está en docs/video_kpi.mp4, pero GitHub lo sirve como
-     application/octet-stream y el navegador no lo reproduce desde ahí.
-     Para incrustar el reproductor hace falta una URL de attachment:
-     arrastra el archivo a un issue nuevo, copia la URL
-     https://github.com/user-attachments/assets/... que genera, cancela el
-     issue, y pega esa URL sola en su propia línea aquí abajo sustituyendo
-     el enlace de descarga.
-     ──────────────────────────────────────────────────────────────────── -->
-
-[Descargar la grabación](docs/video_kpi.mp4) (4,0 MB) · los indicadores, el
-selector de período, el filtro de canales y el asistente de análisis.
+<p align="center"><i>Los indicadores del período, el selector de 30/60/90 días,
+el filtro de canales y el asistente de análisis. La copia del archivo está en
+<a href="docs/video_kpi.mp4">docs/video_kpi.mp4</a>.</i></p>
 
 ---
 
